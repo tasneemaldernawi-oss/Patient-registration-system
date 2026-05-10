@@ -17,14 +17,21 @@ class Admin extends Authenticatable
     protected $primaryKey = 'id';
 
     protected $fillable =[
-        'name',
-        'password'
+        'username',
+        'password',
+        'is_admin'
     ];
 
     protected $hidden =[
  
        'password',
        'remember_token',
+    ];
+
+    // to make integers boolean
+
+    protected $casts = [
+        'is_admin' => 'boolean',
     ];
 
     
