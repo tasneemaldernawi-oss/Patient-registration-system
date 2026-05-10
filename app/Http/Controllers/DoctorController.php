@@ -10,11 +10,11 @@ class DoctorController extends Controller
     //
     public function index(){
         $doctors = Doctor::latest()->get();
-        return view('doctors.index', compact('doctors'));
+        return view('admin.doctors.index', compact('doctors'));
     }
 
     public function create() {
-        return view('doctors.create');
+        return view('admin.doctors.create');
     }
 
     public function store(Request $request){
@@ -28,12 +28,12 @@ class DoctorController extends Controller
         ]);
         Doctor::create($validated);
 
-        return redirect()->route('doctors.index')
+        return redirect()->route('admin.doctors.index')
         ->with('success', 'Doctor added successfully!');
     }
 
     public function edit(Doctor $doctor){
-        return view ('doctors.edit', compact('doctors'));
+        return view ('admin.doctors.edit', compact('doctors'));
     }
 
     public function update(Request $request, Doctor $doctor){
@@ -45,13 +45,13 @@ class DoctorController extends Controller
             'address' => 'required|text',
         ]);
         $doctor->update($validated);
-        return redirect()->route('doctors.index')->with('successs', 'Doctor updated successfully!');
+        return redirect()->route('admin.doctors.index')->with('successs', 'Doctor updated successfully!');
     }
 
     public function destroy(Doctor $doctor){
  
        $doctor->delete();
-       return redirect()->route('doctors.index')->with('success', 'Doctor deleted successfully');
+       return redirect()->route('admin.doctors.index')->with('success', 'Doctor deleted successfully');
     }
 
 

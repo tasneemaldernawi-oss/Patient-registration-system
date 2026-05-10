@@ -42,13 +42,15 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
-    ],
-    // to make entrance for admin
-
-    'admin' =>[
+        // to make entrance for admin
+         'admin' =>[
         'driver' => 'session',
         'provider' => 'admins',
+        ],
     ],
+    
+
+   
 
     /*
     |--------------------------------------------------------------------------
