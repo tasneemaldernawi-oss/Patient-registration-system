@@ -1,6 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
+ <div class="flex justify-between items-center p-6">
+                    <div>
+                        <h2 class="text-2xl font-bold">Dashboard</h2>
+                        <p class="text-blue-900 text-sm">Welcome back, Admin</p>
+                    </div>
+     </div>
 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
     <div class="bg-white p-6 rounded-xl shadow-sm flex justify-between items-center">
         <div>

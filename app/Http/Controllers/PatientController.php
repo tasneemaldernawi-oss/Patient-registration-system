@@ -27,8 +27,12 @@ class PatientController extends Controller
             'phone' => 'required|string|max:20',
             'date_of_birth' => 'required|date',
             'address' => 'nullable|string|max:500',
-        ]);
-
+        ], [
+            'email.unique' => 'That patient already exists in our records.',
+        ]
+        
+        );
+        
         \App\Models\Patient::create($validated);
 
         return redirect()->route('patients.index')
@@ -43,6 +47,7 @@ class PatientController extends Controller
     public function update(Request $request, Patient $patient){
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            //ignore current email
             'email' => 'required|email|unique:patients,email,' . $patient->id,
             'phone' => 'required|string|max:20',
             'date_of_birth' => 'required|date',

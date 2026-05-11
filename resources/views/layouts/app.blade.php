@@ -61,12 +61,7 @@
             <header class="bg-[#1A3263] text-white p-6 shadow-md">
                 
             </header>
-            <div class="flex justify-between items-center p-6">
-                    <div>
-                        <h2 class="text-2xl font-bold">Dashboard</h2>
-                        <p class="text-blue-900 text-sm">Welcome back, Admin</p>
-                    </div>
-                </div>
+           
 
             <div class="p-8">
                 @yield('content')

@@ -1,12 +1,21 @@
 @extends('layouts.app')
 
 @section('content')
+
+@if(session('success'))
+  <div class="max-w-4xl mx-auto mb-4 p-4 bg-green-100 border text-green-700 rounded-lg">
+     {{ session('success')}}
+  </div>
+@endif
+
+
 <div class="flex justify-between items-center mb-6">
     <h2 class="text-2xl font-bold text-slate-800">Manage Patients</h2>
-    <a href="{{ route('patients.create') }}" class="bg-[#1A3263] hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition shadow-sm">
+    <a href="{{ route('patients.create') }}" class="bg-[#1A3263] hover:bg-blue-200 text-white px-4 py-2 rounded-lg transition shadow-sm">
         + Add New Patient
     </a>
 </div>
+
 
 <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200">
     <table class="w-full text-left border-collapse">
@@ -27,9 +36,9 @@
                     <div class="font-medium text-slate-900">{{ $patient->name }}</div>
                 </td>
                 <td class="px-6 py-4 text-sm">
-                    @if($patient->dob)
-                        <span class="text-slate-900">{{ $patient->dob->age ?? 'N/A' }} years</span>
-                        <p>{{ $patient->dob->format('M d, Y') }}</p>
+                    @if($patient->date_of_birth)
+                        <span class="text-slate-900">{{ $patient->date_of_birth->age ?? 'N/A' }} years</span>
+            
                     @else
                        <span class="text-slate-400 italic">No date provided</span>
                     @endif
