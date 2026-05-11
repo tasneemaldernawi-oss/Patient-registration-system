@@ -33,8 +33,31 @@ class AppointmentController extends Controller
           ->with('success', 'Appointment booked successfully!');
 
     }
-    public function destory(Appointment $appointment){
+
+    public function edit(Appointment $appointment){
+        $patients = Patient::all();
+        $doctors = Doctor::all();
+
+        return view('admin.appointments.edit', compact('appointment', 'patients', 'doctors'));
+    }
+
+    public function update(Request $request, Appointment $appointment){
+        $validated = $request->validate([
+        'patient_id' => 'required|exists:patients,id',
+        'doctor_id'  => 'required|exists:doctors,id',
+        'date'       => 'required|date',
+        'time'       => 'required',
+        'status'     => 'required|in:pending,confirmed,cancelled',
+        'reason'     => 'nullable|string',
+            
+        ]);
+        $appointment->update($validated);
+
+        return redirect()->route('appointments.index')
+            ->with('success', 'Appointment updated successfully');
+    }
+    public function destroy(Appointment $appointment){
         $appointment->delete();
-        return redirect()->route('appointment.index')->with('success', 'Appointment deleted sucessfullt');
+        return redirect()->route('appointments.index')->with('success', 'Appointment deleted sucessfullt');
     }
 }

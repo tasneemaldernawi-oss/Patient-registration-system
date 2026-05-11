@@ -5,14 +5,13 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return view('welcome');
 });
-Route::get('dashboard', function(){
-    return view('admin.dashboard');
-})->name('dashboard');
 
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
 
 // create group for admin access
