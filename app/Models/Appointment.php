@@ -27,9 +27,9 @@ class Appointment extends Model
     ];
 
     public function patient(){
-        return $this->belongsTo(Appointment::class);
+        return $this->belongsTo(Patient::class);
     }
     public function doctor(){
-        return $this->belongsTo(Appointment::class);
+        return $this->belongsTo(Doctor::class);
     }
 }

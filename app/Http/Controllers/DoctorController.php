@@ -9,7 +9,7 @@ class DoctorController extends Controller
 {
     //
     public function index(){
-        $doctors = Doctor::latest()->get();
+        $doctors = Doctor::latest()->paginate(10);
         return view('admin.doctors.index', compact('doctors'));
     }
 
@@ -20,38 +20,40 @@ class DoctorController extends Controller
     public function store(Request $request){
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:doctors,email' . $doctor->id,
-            'speciality' => 'required|text',
-            'experience' => 'required|text',
-            'address' => 'required|text',
+            'email' => 'required|email|unique:doctors,email,',
+            'speciality' => 'required|string|max:500',
+            'experience' => 'required|string|max:500',
+            'address' => 'nullable|string|max:500',
 
+        ], [
+            'email.unique'=> 'That doctor already exist in out records.',
         ]);
-        Doctor::create($validated);
+        \App\Models\Doctor::create($validated);
 
-        return redirect()->route('admin.doctors.index')
+        return redirect()->route('doctors.index')
         ->with('success', 'Doctor added successfully!');
     }
 
     public function edit(Doctor $doctor){
-        return view ('admin.doctors.edit', compact('doctors'));
+        return view ('admin.doctors.edit', compact('doctor'));
     }
 
     public function update(Request $request, Doctor $doctor){
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:doctors,email' . $doctor->id,
-            'speciality' => 'required|text',
-            'experience' => 'required|text',
-            'address' => 'required|text',
+            'email' => 'required|email|unique:doctors,email,' . $doctor->id,
+            'speciality' => 'required|string|max:500',
+            'experience' => 'required|string|max:500',
+            'address' => 'nullable|string|max:500',
         ]);
         $doctor->update($validated);
-        return redirect()->route('admin.doctors.index')->with('successs', 'Doctor updated successfully!');
+        return redirect()->route('doctors.index')->with('successs', 'Doctor updated successfully!');
     }
 
     public function destroy(Doctor $doctor){
  
        $doctor->delete();
-       return redirect()->route('admin.doctors.index')->with('success', 'Doctor deleted successfully');
+       return redirect()->route('doctors.index')->with('success', 'Doctor deleted successfully');
     }
 
 

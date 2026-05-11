@@ -10,7 +10,10 @@
 
 
 <div class="flex justify-between items-center mb-6">
-    <h2 class="text-2xl font-bold text-slate-800">Manage Patients</h2>
+    <div> 
+      <h2 class="text-2xl font-bold text-slate-800">Manage Patients</h2>
+      <p class="text-sm text-slate-500">Manage and monitor all patients.</p>
+   </div>
     <a href="{{ route('patients.create') }}" class="bg-[#1A3263] hover:bg-blue-200 text-white px-4 py-2 rounded-lg transition shadow-sm">
         + Add New Patient
     </a>
@@ -18,7 +21,8 @@
 
 
 <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200">
-    <table class="w-full text-left border-collapse">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse ">
         <thead class="bg-slate-50 border-b border-slate-200">
             <tr>
                 <th class="px-6 py-4 text-sm font-semibold text-slate-600">Name</th>
@@ -76,6 +80,7 @@
             @endforelse
         </tbody>
     </table>
+    </div>
     
     <div class="p-4 bg-slate-50 border-t border-slate-200">
         {{ $patients->links() }}
