@@ -9,15 +9,27 @@ class DoctorController extends Controller
 {
     //
     public function index(){
+        if (!session('is_logged_in') || !session('admin_id')) {
+        return redirect()->route('login')->withErrors(['msg' => 'Please login first.']);
+    }
+
         $doctors = Doctor::latest()->paginate(10);
         return view('admin.doctors.index', compact('doctors'));
     }
 
     public function create() {
+        if (!session('is_logged_in') || !session('admin_id')) {
+        return redirect()->route('login')->withErrors(['msg' => 'Please login first.']);
+    }
+
         return view('admin.doctors.create');
     }
 
     public function store(Request $request){
+        if (!session('is_logged_in') || !session('admin_id')) {
+        return redirect()->route('login')->withErrors(['msg' => 'Please login first.']);
+    }
+    
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:doctors,email,',
@@ -35,10 +47,16 @@ class DoctorController extends Controller
     }
 
     public function edit(Doctor $doctor){
+        if (!session('is_logged_in') || !session('admin_id')) {
+        return redirect()->route('login')->withErrors(['msg' => 'Please login first.']);
+    }
         return view ('admin.doctors.edit', compact('doctor'));
     }
 
     public function update(Request $request, Doctor $doctor){
+        if (!session('is_logged_in') || !session('admin_id')) {
+        return redirect()->route('login')->withErrors(['msg' => 'Please login first.']);
+    }
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:doctors,email,' . $doctor->id,
@@ -51,6 +69,9 @@ class DoctorController extends Controller
     }
 
     public function destroy(Doctor $doctor){
+        if (!session('is_logged_in') || !session('admin_id')) {
+        return redirect()->route('login')->withErrors(['msg' => 'Please login first.']);
+    }
  
        $doctor->delete();
        return redirect()->route('doctors.index')->with('success', 'Doctor deleted successfully');

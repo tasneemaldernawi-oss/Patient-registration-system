@@ -14,6 +14,10 @@ class DashboardController extends Controller
     //
 
     public function index(){
+        // Check if admin is logged in
+        if (!session('is_logged_in') || !session('admin_id')) {
+        return redirect()->route('login')->withErrors(['msg' => 'Please login first.']);
+    }
 
          $dailyLoad = Appointment::whereDate('date', Carbon::today())->count();
          $totalPatients = Patient::count();

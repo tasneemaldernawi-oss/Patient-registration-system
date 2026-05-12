@@ -6,10 +6,15 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LoginController;
 
 Route::get('/', function () {
     return view('welcome');
 });
+// Authentication Routes
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
@@ -19,12 +24,10 @@ Route::prefix('admin')->group(function(){
     Route::resource('patients', PatientController::class);
     Route::resource('doctors', DoctorController::class);
     Route::resource('appointments', AppointmentController::class);
-   /* if(Auth::guard('admin')->check() && Auth::guard('admin')->user()->is_admin){
-        Route::resource('patients', PatientController::class);
-        Route::resource('doctors', DoctorController::class);
-    } else {
-        Route::any('{any}', function (){
-            return abort(403, 'Admin access required');
-        })->where('any', '*');
-    } */
+  
 });
+
+
+
+
+
