@@ -15,7 +15,6 @@
             + Book Appointment
         </a>
     </div>
-
     @if(session('success'))
         <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg flex items-center gap-3">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
@@ -102,9 +101,9 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @php
                                         $statusClasses = [
-                                            'pending'   => 'bg-amber-100 text-amber-700 border-amber-200',
-                                            'confirmed' => 'bg-emerald-100 text-emerald-700 border-emerald-200',
-                                            'cancelled' => 'bg-rose-100 text-rose-700 border-rose-200',
+                                            'pending'   => 'bg-[#FFFAE5] text-amber-700 border-[#FFFAE5]',
+                                            'confirmed' => 'bg-[#F0FEED] text-emerald-700 border-[#F0FEED]',
+                                            'cancelled' => 'bg-rose-100 text-rose-700 border-rose-100',
                                         ];
                                         $class = $statusClasses[$appointment->status] ?? 'bg-slate-100 text-slate-700 border-slate-200';
                                     @endphp

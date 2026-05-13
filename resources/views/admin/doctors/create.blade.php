@@ -10,8 +10,12 @@
         </div>
 
         <form action="{{ route('doctors.store') }}" method="POST" class="p-8">
+
             @csrf
-            
+             @error('email')
+                 <p class="text-xs text-rose-500 m-2">{{$message}}</p>
+             @enderror
+          
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
                     <label for="name" class="block text-sm font-semibold text-slate-700">Full Name</label>
@@ -28,9 +32,7 @@
 
                         <!--to validate if the user already exist and show a messge to admin -->
 
-                        @error('email')
-                           <p class="text-xs text-rose-500 mt-1">{{$message}}</p>
-                        @enderror
+                       
                 </div>
 
                  <!-- don't forget to work on phone number field -->
@@ -53,6 +55,7 @@
                     <input type="text" name="address" id="address" 
                         class="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
                 </div>
+                  
             </div>
 
             <div class="mt-8 pt-6 border-t border-slate-100 flex justify-end gap-3">

@@ -65,7 +65,7 @@ class DoctorController extends Controller
             'address' => 'nullable|string|max:500',
         ]);
         $doctor->update($validated);
-        return redirect()->route('doctors.index')->with('successs', 'Doctor updated successfully!');
+        return redirect()->route('doctors.index')->with('success', 'Doctor updated successfully!');
     }
 
     public function destroy(Doctor $doctor){

@@ -18,14 +18,14 @@ class Admin extends Authenticatable
 
     protected $fillable =[
         'username',
-        'password',
-        'is_admin'
+        'password'
+       
     ];
 
     protected $hidden =[
  
        'password',
-       'remember_token',
+       
     ];
 
     // to make integers boolean
