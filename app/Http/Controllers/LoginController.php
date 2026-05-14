@@ -21,7 +21,7 @@ class LoginController extends Controller
     
     $admin = \App\Models\Admin::where('username', $credentials['username'])->first();
 
-    //  useing Hash::check)
+    //  using Hash::check)
     if ($admin && \Hash::check($credentials['password'], $admin->password)) {
         
        
