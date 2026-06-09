@@ -67,20 +67,27 @@
             <form @submit.prevent="submitForm()" class="p-8 space-y-6">
                 @csrf
 
-                <!-- Step 1: Select Patient -->
+                <!-- Step 1: Select Specialty -->
                 <div x-show="currentStep === 0" x-transition>
                     <div class="space-y-6">
-                        <h3 class="text-lg font-semibold text-slate-900">Select Patient</h3>
-                        <div class="grid grid-cols-1 gap-4">
-                            <template x-for="patient in patients" :key="patient.id">
-                                <label class="flex items-center p-4 border-2 rounded-lg cursor-pointer transition hover:bg-slate-50" 
-                                       :class="formData.patient_id == patient.id ? 'border-blue-500 bg-blue-50' : 'border-slate-200'">
-                                    <input type="radio" name="patient_id" :value="patient.id" x-model="formData.patient_id" class="w-4 h-4">
-                                    <div class="ml-4">
-                                        <p class="font-medium text-slate-900" x-text="patient.name"></p>
-                                        <p class="text-sm text-slate-500" x-text="'Phone: ' + patient.phone"></p>
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-900">Select Medical Specialty</h3>
+                            <p class="text-sm text-slate-500">Choose the clinical department required for the new appointment.</p>
+                        </div>
+                        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                            <template x-for="specialty in specialties" :key="specialty.id">
+                                <button type="button"
+                                        @click="selectSpecialty(specialty.id)"
+                                        :class="formData.specialty_id === specialty.id ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-slate-200 bg-white'"
+                                        class="w-full p-6 text-left rounded-3xl border transition hover:border-blue-400 hover:bg-slate-50">
+                                    <div class="flex h-14 w-14 items-center justify-center rounded-3xl bg-blue-50 text-blue-600 text-2xl">
+                                        <span x-text="getIcon(specialty.icon)"></span>
                                     </div>
-                                </label>
+                                    <div class="mt-5">
+                                        <p class="text-base font-semibold text-slate-900" x-text="specialty.name"></p>
+                                        <p class="mt-3 text-sm leading-6 text-slate-500" x-text="specialty.description"></p>
+                                    </div>
+                                </button>
                             </template>
                         </div>
                     </div>
@@ -89,10 +96,13 @@
                 <!-- Step 2: Select Doctor -->
                 <div x-show="currentStep === 1" x-transition>
                     <div class="space-y-6">
-                        <h3 class="text-lg font-semibold text-slate-900">Select Doctor</h3>
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-900">Select Doctor</h3>
+                            <p class="text-sm text-slate-500">Choose a provider in the selected specialty.</p>
+                        </div>
                         <div class="grid grid-cols-1 gap-4">
-                            <template x-for="doctor in doctors" :key="doctor.id">
-                                <label class="flex items-center p-4 border-2 rounded-lg cursor-pointer transition hover:bg-slate-50" 
+                            <template x-for="doctor in availableDoctors()" :key="doctor.id">
+                                <label class="flex items-center p-4 border-2 rounded-lg cursor-pointer transition hover:bg-slate-50"
                                        :class="formData.doctor_id == doctor.id ? 'border-blue-500 bg-blue-50' : 'border-slate-200'">
                                     <input type="radio" name="doctor_id" :value="doctor.id" x-model="formData.doctor_id" class="w-4 h-4">
                                     <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm ml-2 flex-shrink-0"
@@ -103,15 +113,48 @@
                                     </div>
                                 </label>
                             </template>
+                            <template x-if="availableDoctors().length === 0">
+                                <div class="rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center text-slate-500">
+                                    No doctors available for the selected specialty yet.
+                                </div>
+                            </template>
                         </div>
                     </div>
                 </div>
 
-                <!-- Step 3: Select Date & Time -->
+                <!-- Step 3: Select Patient -->
                 <div x-show="currentStep === 2" x-transition>
                     <div class="space-y-6">
-                        <h3 class="text-lg font-semibold text-slate-900">Choose Date & Time</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-900">Select Patient</h3>
+                            <p class="text-sm text-slate-500">Choose an existing patient profile for the appointment.</p>
+                        </div>
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <template x-for="patient in patients" :key="patient.id">
+                                <label class="flex flex-col p-4 rounded-3xl border-2 transition cursor-pointer hover:bg-slate-50"
+                                       :class="formData.patient_id == patient.id ? 'border-blue-500 bg-blue-50' : 'border-slate-200'">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <div>
+                                            <p class="font-semibold text-slate-900" x-text="patient.name"></p>
+                                            <p class="text-sm text-slate-500" x-text="patient.email"></p>
+                                        </div>
+                                        <input type="radio" name="patient_id" :value="patient.id" x-model="formData.patient_id" class="w-4 h-4" />
+                                    </div>
+                                    <p class="mt-3 text-sm text-slate-500" x-text="'Phone: ' + patient.phone"></p>
+                                </label>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Appointment Details -->
+                <div x-show="currentStep === 3" x-transition>
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-900">Appointment Details</h3>
+                            <p class="text-sm text-slate-500">Set the appointment time and provide any context for the visit.</p>
+                        </div>
+                        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-slate-700">Appointment Date</label>
                                 <input type="date" name="date" x-model="formData.date" :min="minDate" 
@@ -124,22 +167,13 @@
                                        class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
                                        required>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Step 4: Add Reason & Status -->
-                <div x-show="currentStep === 3" x-transition>
-                    <div class="space-y-6">
-                        <h3 class="text-lg font-semibold text-slate-900">Additional Details</h3>
-                        <div class="space-y-4">
-                            <div class="space-y-2">
+                            <div class="space-y-2 md:col-span-2">
                                 <label class="block text-sm font-medium text-slate-700">Reason for Visit</label>
                                 <textarea name="reason" x-model="formData.reason" rows="4" 
                                           placeholder="Describe the reason for this appointment..."
                                           class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none"></textarea>
                             </div>
-                            <div class="space-y-2">
+                            <div class="space-y-2 md:col-span-2">
                                 <label class="block text-sm font-medium text-slate-700">Status</label>
                                 <select name="status" x-model="formData.status" 
                                         class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
@@ -157,6 +191,12 @@
                     <div class="space-y-6">
                         <h3 class="text-lg font-semibold text-slate-900">Confirm Appointment Details</h3>
                         <div class="bg-slate-50 rounded-lg p-6 space-y-4">
+                            <div class="flex justify-between items-start pb-4 border-b border-slate-200">
+                                <div>
+                                    <p class="text-sm text-slate-600">Specialty</p>
+                                    <p class="font-medium text-slate-900" x-text="getSpecialtyName()"></p>
+                                </div>
+                            </div>
                             <div class="flex justify-between items-start pb-4 border-b border-slate-200">
                                 <div>
                                     <p class="text-sm text-slate-600">Patient</p>
@@ -315,16 +355,18 @@
             showBooking: false,
             currentStep: 0,
             steps: [
-                'Select Patient',
-                'Select Doctor',
-                'Date & Time',
-                'Additional Details',
+                'Specialty',
+                'Doctor',
+                'Patient',
+                'Appointment',
                 'Confirmation'
             ],
+            specialties: @json($specialties),
             patients: @json($patients),
             doctors: @json($doctors),
             minDate: new Date().toISOString().split('T')[0],
             formData: {
+                specialty_id: '',
                 patient_id: '',
                 doctor_id: '',
                 date: '',
@@ -350,16 +392,38 @@
             canProceed() {
                 switch(this.currentStep) {
                     case 0:
-                        return this.formData.patient_id !== '';
+                        return this.formData.specialty_id !== '';
                     case 1:
                         return this.formData.doctor_id !== '';
                     case 2:
-                        return this.formData.date !== '' && this.formData.time !== '';
+                        return this.formData.patient_id !== '';
                     case 3:
-                        return true; // Reason is optional, status has default
+                        return this.formData.date !== '' && this.formData.time !== '';
+                    case 4:
+                        return true;
                     default:
                         return false;
                 }
+            },
+
+            availableDoctors() {
+                return this.doctors.filter(d => d.specialty_id == this.formData.specialty_id);
+            },
+
+            selectSpecialty(id) {
+                this.formData.specialty_id = id;
+                this.formData.doctor_id = '';
+            },
+
+            getIcon(name) {
+                const icons = {
+                    tooth: '🦷',
+                    sparkles: '✨',
+                    heart: '❤️',
+                    child: '👶',
+                    brain: '🧠',
+                };
+                return icons[name] || '⚕️';
             },
 
             nextStep() {
@@ -384,6 +448,11 @@
                 return doctor ? 'Dr. ' + doctor.name : '';
             },
 
+            getSpecialtyName() {
+                const specialty = this.specialties.find(s => s.id == this.formData.specialty_id);
+                return specialty ? specialty.name : '';
+            },
+
             getDateTime() {
                 if (!this.formData.date || !this.formData.time) return '';
                 const dateObj = new Date(this.formData.date + 'T' + this.formData.time);
@@ -398,6 +467,7 @@
             resetForm() {
                 this.currentStep = 0;
                 this.formData = {
+                    specialty_id: '',
                     patient_id: '',
                     doctor_id: '',
                     date: '',

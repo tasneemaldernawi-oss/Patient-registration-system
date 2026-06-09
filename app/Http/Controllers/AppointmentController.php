@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Doctor;
 use App\Models\Patient;
+use App\Models\Specialty;
 use App\Models\Appointment;
 
 class AppointmentController extends Controller
@@ -16,9 +17,10 @@ class AppointmentController extends Controller
     }
     
         $appointments = Appointment::latest()->paginate(10);
+        $specialties = Specialty::all();
         $patients = Patient::all();
         $doctors = Doctor::all();
-        return view('admin.appointments.index', compact('appointments', 'patients', 'doctors'));
+        return view('admin.appointments.index', compact('appointments', 'specialties', 'patients', 'doctors'));
     }
     public function create(){
 
