@@ -5,20 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Doctor extends Model
+class Specialty extends Model
 {
     use HasFactory;
 
-    protected $table = 'doctors';
+    protected $table = 'specialties';
     protected $primaryKey = 'id';
 
     protected $fillable = [
         'name',
-        'speciality',
-        'specialty_id',
-        'email',
-        'experience',
-        'address',
+        'description',
+        'icon',
     ];
 
     protected $casts = [
@@ -26,13 +23,8 @@ class Doctor extends Model
         'updated_at' => 'datetime',
     ];
 
-    public function appointments()
+    public function doctors()
     {
-        return $this->hasMany(Appointment::class);
-    }
-
-    public function specialty()
-    {
-        return $this->belongsTo(Specialty::class);
+        return $this->hasMany(Doctor::class);
     }
 }
