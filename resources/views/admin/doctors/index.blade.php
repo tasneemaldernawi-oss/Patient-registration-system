@@ -63,7 +63,7 @@
                                 <div class="font-medium text-slate-900">{{ $doctor->name }}</div>
                             </td>
                             <td class="px-6 py-4 text-slate-600 text-sm"> {{$doctor->email}}</td>
-                            <td class="px-6 py-4 text-slate-600 text-sm"> {{$doctor->speciality}}</td>
+                            <td class="px-6 py-4 text-slate-600 text-sm">{{ $doctor->specialty->name ?? ($doctor->speciality ?? 'N/A') }}</td>
                             <td class="px-6 py-4 text-slate-600 text-sm">{{ $doctor->experience }}</td>
                             <td class="px-6 py-4 text-slate-600 text-sm">{{ $doctor->address }}</td>
                             <td class="px-6 py-4 text-right ">

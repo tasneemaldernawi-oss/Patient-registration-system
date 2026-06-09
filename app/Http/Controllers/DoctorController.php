@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Doctor;
+use App\Models\Specialty;
 
 class DoctorController extends Controller
 {
@@ -21,8 +22,8 @@ class DoctorController extends Controller
         if (!session('is_logged_in') || !session('admin_id')) {
         return redirect()->route('login')->withErrors(['msg' => 'Please login first.']);
     }
-
-        return view('admin.doctors.create');
+        $specialties = Specialty::all();
+        return view('admin.doctors.create', compact('specialties'));
     }
 
     public function store(Request $request){
@@ -33,12 +34,14 @@ class DoctorController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:doctors,email,',
-            'speciality' => 'required|string|max:500',
+            'specialty_id' => 'required|exists:specialties,id',
+            'speciality' => 'nullable|string|max:500',
             'experience' => 'required|string|max:500',
             'address' => 'nullable|string|max:500',
-
         ], [
             'email.unique'=> 'That doctor already exist in out records.',
+            'specialty_id.required' => 'Please select a specialty.',
+            'specialty_id.exists' => 'The selected specialty is invalid.',
         ]);
         \App\Models\Doctor::create($validated);
 
@@ -50,7 +53,8 @@ class DoctorController extends Controller
         if (!session('is_logged_in') || !session('admin_id')) {
         return redirect()->route('login')->withErrors(['msg' => 'Please login first.']);
     }
-        return view ('admin.doctors.edit', compact('doctor'));
+        $specialties = Specialty::all();
+        return view ('admin.doctors.edit', compact('doctor', 'specialties'));
     }
 
     public function update(Request $request, Doctor $doctor){
@@ -60,9 +64,13 @@ class DoctorController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:doctors,email,' . $doctor->id,
-            'speciality' => 'required|string|max:500',
+            'specialty_id' => 'required|exists:specialties,id',
+            'speciality' => 'nullable|string|max:500',
             'experience' => 'required|string|max:500',
             'address' => 'nullable|string|max:500',
+        ], [
+            'specialty_id.required' => 'Please select a specialty.',
+            'specialty_id.exists' => 'The selected specialty is invalid.',
         ]);
         $doctor->update($validated);
         return redirect()->route('doctors.index')->with('success', 'Doctor updated successfully!');

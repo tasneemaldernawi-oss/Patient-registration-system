@@ -38,10 +38,25 @@
                  <!-- don't forget to work on phone number field -->
 
                 <div class="space-y-2">
-                    <label for="speciality" class="block text-sm font-semibold text-slate-700">Speciality</label>
-                    <input type="text" name="speciality" id="speciality" required
+                    <label for="specialty_id" class="block text-sm font-semibold text-slate-700">Medical Specialty</label>
+                    <select name="specialty_id" id="specialty_id" required
+                        class="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        <option value="">-- Select Specialty --</option>
+                        @foreach($specialties as $specialty)
+                            <option value="{{ $specialty->id }}">{{ $specialty->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('specialty_id')
+                        <p class="text-xs text-rose-500">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="space-y-2">
+                    <label for="speciality" class="block text-sm font-semibold text-slate-700">Speciality (Legacy)</label>
+                    <input type="text" name="speciality" id="speciality" 
                         class="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                        placeholder="e.g. dentist">
+                        placeholder="e.g. General Dentistry (optional)">
+                    <p class="text-xs text-slate-500">Optional legacy field. Specialty name is preferred above.</p>
                 </div>
                 <div class="space-y-2">
                     <label for="experience" class="block text-sm font-semibold text-slate-700">Experience</label>
