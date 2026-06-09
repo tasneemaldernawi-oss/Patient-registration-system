@@ -16,7 +16,9 @@ class AppointmentController extends Controller
     }
     
         $appointments = Appointment::latest()->paginate(10);
-        return view('admin.appointments.index', compact('appointments'));
+        $patients = Patient::all();
+        $doctors = Doctor::all();
+        return view('admin.appointments.index', compact('appointments', 'patients', 'doctors'));
     }
     public function create(){
 
