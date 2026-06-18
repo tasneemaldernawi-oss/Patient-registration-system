@@ -48,6 +48,15 @@
                 </div>
 
                 <div class="space-y-2">
+                    <label for="gender" class="block text-sm font-semibold text-slate-700">Sex</label>
+                    <select name="gender" id="gender" required class="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        <option value="">Select gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+
+                <div class="space-y-2">
                     <label for="address" class="block text-sm font-semibold text-slate-700">Address</label>
                     <input type="text" name="address" id="address" required
                         class="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">

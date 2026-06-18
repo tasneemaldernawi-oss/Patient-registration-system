@@ -172,7 +172,7 @@
                                                 </div>
                                                 <div class="flex-1">
                                                     <p class="text-sm font-semibold text-slate-900" x-text="patient.name"></p>
-                                                    <p class="mt-1 text-sm text-slate-500 truncate">DOB: <span x-text="patient.dob"></span> | Tel: <span x-text="patient.phone"></span></p>
+                                                    <p class="mt-1 text-sm text-slate-500 truncate">DOB: <span x-text="patient.date_of_birth || patient.dob"></span> | Tel: <span x-text="patient.phone"></span></p>
                                                 </div>
                                                 <div class="flex h-9 w-9 items-center justify-center rounded-full border text-slate-500" :class="formData.patient_id == patient.id ? 'border-blue-500 text-blue-600' : 'border-slate-200'">
                                                     <svg x-show="formData.patient_id == patient.id" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -203,7 +203,17 @@
                                     </div>
                                     <div class="space-y-2">
                                         <label class="block text-sm font-medium text-slate-700">Date of Birth</label>
-                                        <input type="date" x-model="newPatient.dob" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition" />
+                                        <input type="date" x-model="newPatient.date_of_birth" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition" />
+                                    </div>
+                                </div>
+                                <div class="grid gap-4 sm:grid-cols-2">
+                                    <div class="space-y-2">
+                                        <label class="block text-sm font-medium text-slate-700">Gender</label>
+                                        <select x-model="newPatient.gender" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition">
+                                            <option value="">Select gender</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
@@ -444,7 +454,8 @@
                 name: '',
                 email: '',
                 phone: '',
-                dob: ''
+                date_of_birth: '',
+                gender: ''
             },
 
             init() {
@@ -487,7 +498,7 @@
             },
 
             isNewPatientValid() {
-                return this.newPatient.name.trim() !== '' && this.newPatient.email.trim() !== '' && this.newPatient.phone.trim() !== '' && this.newPatient.dob !== '';
+                return this.newPatient.name.trim() !== '' && this.newPatient.email.trim() !== '' && this.newPatient.phone.trim() !== '' && this.newPatient.date_of_birth !== '' && (this.newPatient.gender === 'Male' || this.newPatient.gender === 'Female');
             },
 
             getInitials(name) {
@@ -577,17 +588,44 @@
             },
 
             async submitForm() {
-                // Submit the form
-                const formData = new FormData();
-                formData.append('_token', document.querySelector('input[name="_token"]').value);
-                formData.append('patient_id', this.formData.patient_id);
-                formData.append('doctor_id', this.formData.doctor_id);
-                formData.append('date', this.formData.date);
-                formData.append('time', this.formData.time);
-                formData.append('reason', this.formData.reason);
-                formData.append('status', this.formData.status);
-
+                // If creating a new patient, create it first via AJAX
                 try {
+                    if (this.patientMode === 'new') {
+                        const pForm = new FormData();
+                        pForm.append('_token', document.querySelector('input[name="_token"]').value);
+                        pForm.append('name', this.newPatient.name);
+                        pForm.append('email', this.newPatient.email);
+                        pForm.append('phone', this.newPatient.phone);
+                        pForm.append('date_of_birth', this.newPatient.date_of_birth);
+                        pForm.append('gender', this.newPatient.gender);
+                        pForm.append('address', '');
+
+                        const pResp = await fetch('{{ route("patients.store") }}', {
+                            method: 'POST',
+                            body: pForm
+                        });
+
+                        if (!pResp.ok) {
+                            const errText = await pResp.text();
+                            console.error('Patient create failed:', errText);
+                            alert('Error creating patient record');
+                            return;
+                        }
+
+                        const created = await pResp.json();
+                        this.formData.patient_id = created.id;
+                    }
+
+                    // Submit appointment
+                    const formData = new FormData();
+                    formData.append('_token', document.querySelector('input[name="_token"]').value);
+                    formData.append('patient_id', this.formData.patient_id);
+                    formData.append('doctor_id', this.formData.doctor_id);
+                    formData.append('date', this.formData.date);
+                    formData.append('time', this.formData.time);
+                    formData.append('reason', this.formData.reason);
+                    formData.append('status', this.formData.status);
+
                     const response = await fetch('{{ route("appointments.store") }}', {
                         method: 'POST',
                         body: formData

@@ -36,6 +36,7 @@ class PatientController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|unique:patients,email',
+            'gender' => 'required|in:Male,Female',
             'phone' => 'required|string|max:20',
             'date_of_birth' => 'required|date',
             'address' => 'nullable|string|max:500',
@@ -45,7 +46,12 @@ class PatientController extends Controller
         
         );
         
-        \App\Models\Patient::create($validated);
+        $patient = \App\Models\Patient::create($validated);
+
+        // Return JSON for AJAX requests (used by booking flow)
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json($patient, 201);
+        }
 
         return redirect()->route('patients.index')
                          ->with('success', 'Patient registered successfully!');
@@ -69,6 +75,7 @@ class PatientController extends Controller
             'name' => 'required|string|max:255',
             //ignore current email
             'email' => 'required|email|unique:patients,email,' . $patient->id,
+            'gender' => 'required|in:Male,Female',
             'phone' => 'required|string|max:20',
             'date_of_birth' => 'required|date',
             'address' => 'nullable|string|max:500',

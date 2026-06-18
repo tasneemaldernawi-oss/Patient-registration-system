@@ -47,6 +47,7 @@
                         <tr>
                             <th class="px-6 py-4 text-sm font-semibold text-slate-600">Name</th>
                             <th class="px-6 py-4 text-sm font-semibold text-slate-600">Age</th>
+                            <th class="px-6 py-4 text-sm font-semibold text-slate-600">Gender</th>
                             <th class="px-6 py-4 text-sm font-semibold text-slate-600">Phone Number</th>
                             <th class="px-6 py-4 text-sm font-semibold text-slate-600">Email</th>
                             <th class="px-6 py-4 text-sm font-semibold text-slate-600">Address</th>
@@ -69,6 +70,7 @@
                             <td class="px-6 py-4 text-slate-600 text-sm"> {{$patient->phone}}</td>
                             <td class="px-6 py-4 text-slate-600 text-sm"> {{$patient->address}}</td>
                             <td class="px-6 py-4 text-slate-600 text-sm">{{ $patient->email }}</td>
+                            <td class="px-6 py-4 text-slate-600 text-sm">{{ $patient->gender }}</td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-3 whitespace-nowrap">
                                     <a href="{{ route('patients.edit', $patient->id) }}" class="text-blue-700 hover:text-blue-800">
