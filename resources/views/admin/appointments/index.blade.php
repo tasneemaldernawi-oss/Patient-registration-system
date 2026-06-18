@@ -122,27 +122,95 @@
                     </div>
                 </div>
 
-                <!-- Step 3: Select Patient -->
+                <!-- Step 3: Patient Information Records -->
                 <div x-show="currentStep === 2" x-transition>
                     <div class="space-y-6">
-                        <div>
-                            <h3 class="text-lg font-semibold text-slate-900">Select Patient</h3>
-                            <p class="text-sm text-slate-500">Choose an existing patient profile for the appointment.</p>
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div class="space-y-2">
+                                <h3 class="text-lg font-semibold text-slate-900">Patient Information Records</h3>
+                                <p class="text-sm text-slate-500">Associate an existing clinical record or declare a new registration patient path.</p>
+                            </div>
+                            <div class="flex items-center gap-2 rounded-full bg-slate-100 p-1">
+                                <button type="button" @click="patientMode = 'existing'" :class="patientMode === 'existing' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'" class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A9.003 9.003 0 0112 15c2.037 0 3.918.648 5.379 1.748M15 11a3 3 0 11-6 0 3 3 0 016 0Zm6 2.25a9 9 0 11-18 0 9 9 0 0118 0Z" />
+                                    </svg>
+                                    Existing Patient
+                                </button>
+                                <button type="button" @click="patientMode = 'new'" :class="patientMode === 'new' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'" class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11.25a3 3 0 11-6 0 3 3 0 016 0Zm-6.75 4.5a5.25 5.25 0 1110.5 0v1.5m-9.75 4.5h8.25M12 7.5v3.75" />
+                                    </svg>
+                                    Create New Record
+                                </button>
+                            </div>
                         </div>
-                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <template x-for="patient in patients" :key="patient.id">
-                                <label class="flex flex-col p-4 rounded-3xl border-2 transition cursor-pointer hover:bg-slate-50"
-                                       :class="formData.patient_id == patient.id ? 'border-blue-500 bg-blue-50' : 'border-slate-200'">
-                                    <div class="flex items-center justify-between gap-3">
-                                        <div>
-                                            <p class="font-semibold text-slate-900" x-text="patient.name"></p>
-                                            <p class="text-sm text-slate-500" x-text="patient.email"></p>
+                        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
+                            <div x-show="patientMode === 'existing'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+                                <div class="mb-5">
+                                    <label class="relative block">
+                                        <span class="sr-only">Search patients</span>
+                                        <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15Z" />
+                                            </svg>
+                                        </span>
+                                        <input type="text" x-model="patientSearch" placeholder="Filter existing patients list by full name or telephone..." class="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition" />
+                                    </label>
+                                </div>
+                                <div class="max-h-[420px] overflow-y-auto space-y-3">
+                                    <template x-if="filteredPatients().length === 0">
+                                        <div class="rounded-3xl border border-dashed border-slate-200 bg-slate-50 p-10 text-center text-sm text-slate-500">
+                                            No matching patients found.
                                         </div>
-                                        <input type="radio" name="patient_id" :value="patient.id" x-model="formData.patient_id" class="w-4 h-4" />
+                                    </template>
+                                    <template x-for="patient in filteredPatients()" :key="patient.id">
+                                        <button type="button" @click="formData.patient_id = patient.id" class="w-full rounded-3xl border p-4 text-left transition hover:border-blue-300 hover:bg-slate-50" :class="formData.patient_id == patient.id ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-slate-200 bg-white'">
+                                            <div class="flex items-center gap-4">
+                                                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">
+                                                    <span x-text="getInitials(patient.name)"></span>
+                                                </div>
+                                                <div class="flex-1">
+                                                    <p class="text-sm font-semibold text-slate-900" x-text="patient.name"></p>
+                                                    <p class="mt-1 text-sm text-slate-500 truncate">DOB: <span x-text="patient.dob"></span> | Tel: <span x-text="patient.phone"></span></p>
+                                                </div>
+                                                <div class="flex h-9 w-9 items-center justify-center rounded-full border text-slate-500" :class="formData.patient_id == patient.id ? 'border-blue-500 text-blue-600' : 'border-slate-200'">
+                                                    <svg x-show="formData.patient_id == patient.id" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                    <span x-show="formData.patient_id != patient.id">+</span>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+                            <div x-show="patientMode === 'new'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="space-y-5">
+                                <div class="grid gap-4 sm:grid-cols-2">
+                                    <div class="space-y-2">
+                                        <label class="block text-sm font-medium text-slate-700">Full Name</label>
+                                        <input type="text" x-model="newPatient.name" placeholder="Jane Doe" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition" />
                                     </div>
-                                    <p class="mt-3 text-sm text-slate-500" x-text="'Phone: ' + patient.phone"></p>
-                                </label>
-                            </template>
+                                    <div class="space-y-2">
+                                        <label class="block text-sm font-medium text-slate-700">Email</label>
+                                        <input type="email" x-model="newPatient.email" placeholder="jane@example.com" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition" />
+                                    </div>
+                                </div>
+                                <div class="grid gap-4 sm:grid-cols-2">
+                                    <div class="space-y-2">
+                                        <label class="block text-sm font-medium text-slate-700">Phone Number</label>
+                                        <input type="tel" x-model="newPatient.phone" placeholder="+1 (555) 349-8091" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition" />
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label class="block text-sm font-medium text-slate-700">Date of Birth</label>
+                                        <input type="date" x-model="newPatient.dob" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition" />
+                                    </div>
+                                </div>
+                                <div class="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                                    <p class="font-medium text-slate-900">New patient registration preview</p>
+                                    <p class="mt-2">Complete the essential contact fields to create a new patient record for the appointment.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -232,14 +300,10 @@
                         ← Back
                     </button>
                     <div class="flex gap-3" x-show="currentStep < 4">
-                        <button type="button" @click="toggleBooking()"
-                                class="px-6 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition font-medium">
-                            Cancel
-                        </button>
                         <button type="button" @click="nextStep()" :disabled="!canProceed()"
                                 :class="canProceed() ? 'bg-[#1A3263] hover:bg-blue-700 text-white' : 'bg-slate-200 text-slate-400 cursor-not-allowed'"
                                 class="px-6 py-2 rounded-lg transition font-medium shadow-sm">
-                            Next →
+                            Next Step →
                         </button>
                     </div>
                     <div class="flex gap-3" x-show="currentStep === 4">
@@ -364,6 +428,8 @@
             specialties: @json($specialties),
             patients: @json($patients),
             doctors: @json($doctors),
+            patientMode: 'existing',
+            patientSearch: '',
             minDate: new Date().toISOString().split('T')[0],
             formData: {
                 specialty_id: '',
@@ -373,6 +439,12 @@
                 time: '',
                 reason: '',
                 status: 'pending'
+            },
+            newPatient: {
+                name: '',
+                email: '',
+                phone: '',
+                dob: ''
             },
 
             init() {
@@ -396,7 +468,7 @@
                     case 1:
                         return this.formData.doctor_id !== '';
                     case 2:
-                        return this.formData.patient_id !== '';
+                        return this.patientMode === 'existing' ? this.formData.patient_id !== '' : this.isNewPatientValid();
                     case 3:
                         return this.formData.date !== '' && this.formData.time !== '';
                     case 4:
@@ -404,6 +476,22 @@
                     default:
                         return false;
                 }
+            },
+
+            filteredPatients() {
+                if (!this.patientSearch) return this.patients;
+                return this.patients.filter(patient => {
+                    const query = this.patientSearch.toLowerCase();
+                    return patient.name.toLowerCase().includes(query) || patient.phone.toLowerCase().includes(query);
+                });
+            },
+
+            isNewPatientValid() {
+                return this.newPatient.name.trim() !== '' && this.newPatient.email.trim() !== '' && this.newPatient.phone.trim() !== '' && this.newPatient.dob !== '';
+            },
+
+            getInitials(name) {
+                return name.split(' ').slice(0,2).map(part => part.charAt(0).toUpperCase()).join('');
             },
 
             availableDoctors() {
@@ -439,6 +527,9 @@
             },
 
             getPatientName() {
+                if (this.patientMode === 'new' && this.newPatient.name.trim() !== '') {
+                    return this.newPatient.name;
+                }
                 const patient = this.patients.find(p => p.id == this.formData.patient_id);
                 return patient ? patient.name : '';
             },
@@ -466,6 +557,8 @@
 
             resetForm() {
                 this.currentStep = 0;
+                this.patientMode = 'existing';
+                this.patientSearch = '';
                 this.formData = {
                     specialty_id: '',
                     patient_id: '',
@@ -474,6 +567,12 @@
                     time: '',
                     reason: '',
                     status: 'pending'
+                };
+                this.newPatient = {
+                    name: '',
+                    email: '',
+                    phone: '',
+                    dob: ''
                 };
             },
 
