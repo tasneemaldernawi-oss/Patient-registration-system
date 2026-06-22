@@ -121,110 +121,110 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Step 3: Patient Information Records -->
                 <div x-show="currentStep === 2" x-transition>
-                    <div class="space-y-6">
-                        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                            <div class="space-y-2">
-                                <h3 class="text-lg font-semibold text-slate-900">Patient Information Records</h3>
-                                <p class="text-sm text-slate-500">Associate an existing clinical record or declare a new registration patient path.</p>
-                            </div>
-                            <div class="flex items-center gap-2 rounded-full bg-slate-100 p-1">
-                                <button type="button" @click="patientMode = 'existing'" :class="patientMode === 'existing' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'" class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A9.003 9.003 0 0112 15c2.037 0 3.918.648 5.379 1.748M15 11a3 3 0 11-6 0 3 3 0 016 0Zm6 2.25a9 9 0 11-18 0 9 9 0 0118 0Z" />
-                                    </svg>
-                                    Existing Patient
-                                </button>
-                                <button type="button" @click="patientMode = 'new'" :class="patientMode === 'new' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'" class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11.25a3 3 0 11-6 0 3 3 0 016 0Zm-6.75 4.5a5.25 5.25 0 1110.5 0v1.5m-9.75 4.5h8.25M12 7.5v3.75" />
-                                    </svg>
-                                    Create New Record
-                                </button>
-                            </div>
+    <input type="hidden" name="patient_mode" :value="patientMode">
+    <input type="hidden" name="patient_id" :value="formData.patient_id">
+
+    <div class="space-y-6">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div class="space-y-2">
+                <h3 class="text-lg font-semibold text-slate-900">Patient Information Records</h3>
+                <p class="text-sm text-slate-500">Associate an existing clinical record or declare a new registration patient path.</p>
+            </div>
+            <div class="flex items-center gap-2 rounded-full bg-slate-100 p-1">
+                <button type="button" @click="patientMode = 'existing'" :class="patientMode === 'existing' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'" class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A9.003 9.003 0 0112 15c2.037 0 3.918.648 5.379 1.748M15 11a3 3 0 11-6 0 3 3 0 016 0Zm6 2.25a9 9 0 11-18 0 9 9 0 0118 0Z" />
+                    </svg>
+                    Existing Patient
+                </button>
+                <button type="button" @click="patientMode = 'new'" :class="patientMode === 'new' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'" class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11.25a3 3 0 11-6 0 3 3 0 016 0Zm-6.75 4.5a5.25 5.25 0 1110.5 0v1.5m-9.75 4.5h8.25M12 7.5v3.75" />
+                    </svg>
+                    Create New Record
+                </button>
+            </div>
+        </div>
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
+            <div x-show="patientMode === 'existing'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+                <div class="mb-5">
+                    <label class="relative block">
+                        <span class="sr-only">Search patients</span>
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15Z" />
+                            </svg>
+                        </span>
+                        <input type="text" x-model="patientSearch" placeholder="Filter existing patients list by full name or telephone..." class="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition" />
+                    </label>
+                </div>
+                <div class="max-h-[420px] overflow-y-auto space-y-3">
+                    <template x-if="filteredPatients().length === 0">
+                        <div class="rounded-3xl border border-dashed border-slate-200 bg-slate-50 p-10 text-center text-sm text-slate-500">
+                            No matching patients found.
                         </div>
-                        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
-                            <div x-show="patientMode === 'existing'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
-                                <div class="mb-5">
-                                    <label class="relative block">
-                                        <span class="sr-only">Search patients</span>
-                                        <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15Z" />
-                                            </svg>
-                                        </span>
-                                        <input type="text" x-model="patientSearch" placeholder="Filter existing patients list by full name or telephone..." class="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition" />
-                                    </label>
+                    </template>
+                    <template x-for="patient in filteredPatients()" :key="patient.id">
+                        <button type="button" @click="formData.patient_id = patient.id" class="w-full rounded-3xl border p-4 text-left transition hover:border-blue-300 hover:bg-slate-50" :class="formData.patient_id == patient.id ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-slate-200 bg-white'">
+                            <div class="flex items-center gap-4">
+                                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">
+                                    <span x-text="getInitials(patient.name)"></span>
                                 </div>
-                                <div class="max-h-[420px] overflow-y-auto space-y-3">
-                                    <template x-if="filteredPatients().length === 0">
-                                        <div class="rounded-3xl border border-dashed border-slate-200 bg-slate-50 p-10 text-center text-sm text-slate-500">
-                                            No matching patients found.
-                                        </div>
-                                    </template>
-                                    <template x-for="patient in filteredPatients()" :key="patient.id">
-                                        <button type="button" @click="formData.patient_id = patient.id" class="w-full rounded-3xl border p-4 text-left transition hover:border-blue-300 hover:bg-slate-50" :class="formData.patient_id == patient.id ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-slate-200 bg-white'">
-                                            <div class="flex items-center gap-4">
-                                                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">
-                                                    <span x-text="getInitials(patient.name)"></span>
-                                                </div>
-                                                <div class="flex-1">
-                                                    <p class="text-sm font-semibold text-slate-900" x-text="patient.name"></p>
-                                                    <p class="mt-1 text-sm text-slate-500 truncate">DOB: <span x-text="patient.date_of_birth || patient.dob"></span> | Tel: <span x-text="patient.phone"></span></p>
-                                                </div>
-                                                <div class="flex h-9 w-9 items-center justify-center rounded-full border text-slate-500" :class="formData.patient_id == patient.id ? 'border-blue-500 text-blue-600' : 'border-slate-200'">
-                                                    <svg x-show="formData.patient_id == patient.id" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                                                    </svg>
-                                                    <span x-show="formData.patient_id != patient.id">+</span>
-                                                </div>
-                                            </div>
-                                        </button>
-                                    </template>
+                                <div class="flex-1">
+                                    <p class="text-sm font-semibold text-slate-900" x-text="patient.name"></p>
+                                    <p class="mt-1 text-sm text-slate-500 truncate">DOB: <span x-text="patient.date_of_birth || patient.dob"></span> | Tel: <span x-text="patient.phone"></span></p>
+                                </div>
+                                <div class="flex h-9 w-9 items-center justify-center rounded-full border text-slate-500" :class="formData.patient_id == patient.id ? 'border-blue-500 text-blue-600' : 'border-slate-200'">
+                                    <svg x-show="formData.patient_id == patient.id" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span x-show="formData.patient_id != patient.id">+</span>
                                 </div>
                             </div>
-                            <div x-show="patientMode === 'new'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="space-y-5">
-                                <div class="grid gap-4 sm:grid-cols-2">
-                                    <div class="space-y-2">
-                                        <label class="block text-sm font-medium text-slate-700">Full Name</label>
-                                        <input type="text" x-model="newPatient.name" placeholder="Jane Doe" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition" />
-                                    </div>
-                                    <div class="space-y-2">
-                                        <label class="block text-sm font-medium text-slate-700">Email</label>
-                                        <input type="email" x-model="newPatient.email" placeholder="jane@example.com" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition" />
-                                    </div>
-                                </div>
-                                <div class="grid gap-4 sm:grid-cols-2">
-                                    <div class="space-y-2">
-                                        <label class="block text-sm font-medium text-slate-700">Phone Number</label>
-                                        <input type="tel" x-model="newPatient.phone" placeholder="+1 (555) 349-8091" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition" />
-                                    </div>
-                                    <div class="space-y-2">
-                                        <label class="block text-sm font-medium text-slate-700">Date of Birth</label>
-                                        <input type="date" x-model="newPatient.date_of_birth" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition" />
-                                    </div>
-                                </div>
-                                <div class="grid gap-4 sm:grid-cols-2">
-                                    <div class="space-y-2">
-                                        <label class="block text-sm font-medium text-slate-700">Gender</label>
-                                        <select x-model="newPatient.gender" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition">
-                                            <option value="">Select gender</option>
-                                            <option value="Male">Male</option>
-                                            <option value="Female">Female</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-                                    <p class="font-medium text-slate-900">New patient registration preview</p>
-                                    <p class="mt-2">Complete the essential contact fields to create a new patient record for the appointment.</p>
-                                </div>
-                            </div>
-                        </div>
+                        </button>
+                    </template>
+                </div>
+            </div>
+            <div x-show="patientMode === 'new'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="space-y-5">
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-slate-700">Full Name</label>
+                        <input type="text" name="name" x-model="newPatient.name" placeholder="Jane Doe" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition" />
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-slate-700">Email</label>
+                        <input type="email" name="email" x-model="newPatient.email" placeholder="jane@example.com" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition" />
                     </div>
                 </div>
-
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-slate-700">Phone Number</label>
+                        <input type="tel" name="phone" x-model="newPatient.phone" placeholder="+1 (555) 349-8091" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition" />
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-slate-700">Date of Birth</label>
+                        <input type="date" name="date_of_birth" x-model="newPatient.date_of_birth" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition" />
+                    </div>
+                </div>
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-slate-700">Gender</label>
+                        <select name="gender" x-model="newPatient.gender" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition">
+                            <option value="">Select gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                    <p class="font-medium text-slate-900">New patient registration preview</p>
+                    <p class="mt-2">Complete the essential contact fields to create a new patient record for the appointment.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
                 <!-- Step 4: Appointment Details -->
                 <div x-show="currentStep === 3" x-transition>
                     <div class="space-y-6">
@@ -588,60 +588,98 @@
             },
 
             async submitForm() {
-                // If creating a new patient, create it first via AJAX
-                try {
-                    if (this.patientMode === 'new') {
-                        const pForm = new FormData();
-                        pForm.append('_token', document.querySelector('input[name="_token"]').value);
-                        pForm.append('name', this.newPatient.name);
-                        pForm.append('email', this.newPatient.email);
-                        pForm.append('phone', this.newPatient.phone);
-                        pForm.append('date_of_birth', this.newPatient.date_of_birth);
-                        pForm.append('gender', this.newPatient.gender);
-                        pForm.append('address', '');
+    // If creating a new patient, create it first via AJAX
+    try {
+        if (this.patientMode === 'new') {
+            const pForm = new FormData();
+            pForm.append('_token', document.querySelector('input[name="_token"]').value);
+            pForm.append('name', this.newPatient.name);
+            pForm.append('email', this.newPatient.email);
+            pForm.append('phone', this.newPatient.phone);
+            pForm.append('date_of_birth', this.newPatient.date_of_birth);
+            pForm.append('gender', this.newPatient.gender);
+            pForm.append('address', 'Not provided'); // Placeholder, adjust as needed
 
-                        const pResp = await fetch('{{ route("patients.store") }}', {
-                            method: 'POST',
-                            body: pForm
-                        });
+            const pResp = await fetch('{{ route("patients.store") }}', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                },
+                body: pForm
+            });
 
-                        if (!pResp.ok) {
-                            const errText = await pResp.text();
-                            console.error('Patient create failed:', errText);
-                            alert('Error creating patient record');
-                            return;
-                        }
-
-                        const created = await pResp.json();
-                        this.formData.patient_id = created.id;
-                    }
-
-                    // Submit appointment
-                    const formData = new FormData();
-                    formData.append('_token', document.querySelector('input[name="_token"]').value);
-                    formData.append('patient_id', this.formData.patient_id);
-                    formData.append('doctor_id', this.formData.doctor_id);
-                    formData.append('date', this.formData.date);
-                    formData.append('time', this.formData.time);
-                    formData.append('reason', this.formData.reason);
-                    formData.append('status', this.formData.status);
-
-                    const response = await fetch('{{ route("appointments.store") }}', {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    if (response.ok) {
-                        // Reload to show success message
-                        window.location.reload();
-                    } else {
-                        alert('Error booking appointment');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('Error submitting form');
+            if (!pResp.ok) {
+                const errorData = await pResp.json();
+                console.error('Patient create failed:', errorData);
+                
+                // Display validation errors if available
+                if (errorData.errors) {
+                    const errorMessages = Object.values(errorData.errors).flat().join('\n');
+                    alert('Validation errors:\n' + errorMessages);
+                } else if (errorData.message) {
+                    alert('Error: ' + errorData.message);
+                } else {
+                    alert('Error creating patient record');
                 }
+                return;
             }
+
+            const created = await pResp.json();
+            
+            // Check if the response has the expected structure
+            if (created.id) {
+                this.formData.patient_id = created.id;
+            } else if (created.data && created.data.id) {
+                // Handle wrapped responses
+                this.formData.patient_id = created.data.id;
+            } else {
+                console.error('Unexpected response format:', created);
+                alert('Unexpected response from server');
+                return;
+            }
+        }
+
+        // Submit appointment
+        const formData = new FormData();
+        formData.append('_token', document.querySelector('input[name="_token"]').value);
+        formData.append('patient_id', this.formData.patient_id);
+        formData.append('doctor_id', this.formData.doctor_id);
+        formData.append('date', this.formData.date);
+        formData.append('time', this.formData.time);
+        formData.append('reason', this.formData.reason);
+        formData.append('status', this.formData.status);
+
+        const response = await fetch('{{ route("appointments.store") }}', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            },
+            body: formData
+        });
+
+        if (response.ok) {
+            // Reload to show success message
+            window.location.reload();
+        } else {
+            const errorData = await response.json();
+            console.error('Appointment creation failed:', errorData);
+            
+            if (errorData.errors) {
+                const errorMessages = Object.values(errorData.errors).flat().join('\n');
+                alert('Validation errors:\n' + errorMessages);
+            } else if (errorData.message) {
+                alert('Error: ' + errorData.message);
+            } else {
+                alert('Error booking appointment');
+            }
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error submitting form: ' + error.message);
+    }
+}
         }
     }
 </script>

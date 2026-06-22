@@ -29,34 +29,38 @@ class PatientController extends Controller
     }
 
     public function store(Request $request){
-        if (!session('is_logged_in') || !session('admin_id')) {
+    if (!session('is_logged_in') || !session('admin_id')) {
+        // Return JSON error for AJAX requests
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'message' => 'Session expired. Please login again.',
+                'error' => 'unauthenticated'
+            ], 401);
+        }
         return redirect()->route('login')->withErrors(['msg' => 'Please login first.']);
     }
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|unique:patients,email',
-            'gender' => 'required|in:Male,Female',
-            'phone' => 'required|string|max:20',
-            'date_of_birth' => 'required|date',
-            'address' => 'nullable|string|max:500',
-        ], [
-            'email.unique' => 'That patient already exists in our records.',
-        ]
-        
-        );
-        
-        $patient = \App\Models\Patient::create($validated);
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|unique:patients,email',
+        'gender' => 'required|in:Male,Female',
+        'phone' => 'required|string|max:20',
+        'date_of_birth' => 'required|date',
+        'address' => 'nullable|string|max:500',
+    ], [
+        'email.unique' => 'That patient already exists in our records.',
+    ]);
+    
+    $patient = \App\Models\Patient::create($validated);
 
-        // Return JSON for AJAX requests (used by booking flow)
-        if ($request->wantsJson() || $request->ajax()) {
-            return response()->json($patient, 201);
-        }
-
-        return redirect()->route('patients.index')
-                         ->with('success', 'Patient registered successfully!');
-        
+    // Return JSON for AJAX requests (used by booking flow)
+    if ($request->wantsJson() || $request->ajax()) {
+        return response()->json($patient, 201);
     }
+
+    return redirect()->route('patients.index')
+                     ->with('success', 'Patient registered successfully!');
+}
      //we use (Patient $patient) when we deal with one specific row
     public function edit(Patient $patient){
         if (!session('is_logged_in') || !session('admin_id')) {
