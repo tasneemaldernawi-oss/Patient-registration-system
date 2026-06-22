@@ -2,100 +2,65 @@
 
 namespace App\Http\Controllers;
 
-
 use Illuminate\Http\Request;
 use App\Models\Patient;
+
 class PatientController extends Controller
 {
-    // show all patients
-    public function index(){
-        if (!session('is_logged_in') || !session('admin_id')) {
-        return redirect()->route('login')->withErrors(['msg' => 'Please login first.']);
-    }
-
+    public function index()
+    {
         $patients = Patient::latest()->paginate(10);
-        return view('admin.patients.index', compact('patients'));
-
+        return view('receptionist.patients.index', compact('patients'));
     }
 
-    // adding patients
-
-    public function create(){
-        if (!session('is_logged_in') || !session('admin_id')) {
-        return redirect()->route('login')->withErrors(['msg' => 'Please login first.']);
+    public function create()
+    {
+        return view('receptionist.patients.create');
     }
 
-        return view('admin.patients.create');
-    }
-
-    public function store(Request $request){
-    if (!session('is_logged_in') || !session('admin_id')) {
-        // Return JSON error for AJAX requests
-        if ($request->wantsJson() || $request->ajax()) {
-            return response()->json([
-                'message' => 'Session expired. Please login again.',
-                'error' => 'unauthenticated'
-            ], 401);
-        }
-        return redirect()->route('login')->withErrors(['msg' => 'Please login first.']);
-    }
-
-    $validated = $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|string|unique:patients,email',
-        'gender' => 'required|in:Male,Female',
-        'phone' => 'required|string|max:20',
-        'date_of_birth' => 'required|date',
-        'address' => 'nullable|string|max:500',
-    ], [
-        'email.unique' => 'That patient already exists in our records.',
-    ]);
-    
-    $patient = \App\Models\Patient::create($validated);
-
-    // Return JSON for AJAX requests (used by booking flow)
-    if ($request->wantsJson() || $request->ajax()) {
-        return response()->json($patient, 201);
-    }
-
-    return redirect()->route('patients.index')
-                     ->with('success', 'Patient registered successfully!');
-}
-     //we use (Patient $patient) when we deal with one specific row
-    public function edit(Patient $patient){
-        if (!session('is_logged_in') || !session('admin_id')) {
-        return redirect()->route('login')->withErrors(['msg' => 'Please login first.']);
-    }
-
-        return view('admin.patients.edit', compact('patient'));
-    }
-
-    public function update(Request $request, Patient $patient){
-        if (!session('is_logged_in') || !session('admin_id')) {
-        return redirect()->route('login')->withErrors(['msg' => 'Please login first.']);
-    }
-
+    public function store(Request $request)
+    {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            //ignore current email
-            'email' => 'required|email|unique:patients,email,' . $patient->id,
-            'gender' => 'required|in:Male,Female',
-            'phone' => 'required|string|max:20',
+            'name'          => 'required|string|max:255',
+            'email'         => 'required|string|email|unique:patients,email',
+            'gender'        => 'required|in:Male,Female',
+            'phone'         => 'required|string|max:20',
             'date_of_birth' => 'required|date',
-            'address' => 'nullable|string|max:500',
+            'address'       => 'nullable|string|max:500',
+        ]);
+        
+        $patient = Patient::create($validated);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json($patient, 201);
+        }
+
+        return redirect()->route('patients.index')->with('success', 'Patient registered successfully!');
+    }
+
+    public function edit(Patient $patient)
+    {
+        return view('receptionist.patients.edit', compact('patient'));
+    }
+
+    public function update(Request $request, Patient $patient)
+    {
+        $validated = $request->validate([
+            'name'          => 'required|string|max:255',
+            'email'         => 'required|email|unique:patients,email,' . $patient->id,
+            'gender'        => 'required|in:Male,Female',
+            'phone'         => 'required|string|max:20',
+            'date_of_birth' => 'required|date',
+            'address'       => 'nullable|string|max:500',
         ]);
 
         $patient->update($validated);
-        return redirect()->route('patients.index')->with('success', 'Patient updates successfully');
+        return redirect()->route('patients.index')->with('success', 'Patient metrics updated successfully.');
     }
 
-    public function destroy(Patient $patient){
-        if (!session('is_logged_in') || !session('admin_id')) {
-        return redirect()->route('login')->withErrors(['msg' => 'Please login first.']);
-    }
-    
+    public function destroy(Patient $patient)
+    {
         $patient->delete();
-        return redirect()->route('patients.index')->with('success', 'Patient deleted successfully');
+        return redirect()->route('patients.index')->with('success', 'Patient record discarded.');
     }
-
 }

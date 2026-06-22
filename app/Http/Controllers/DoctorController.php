@@ -3,87 +3,145 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\User;
 use App\Models\Doctor;
 use App\Models\Specialty;
+use App\Models\Appointment;
+use App\Models\MedicalRecord;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class DoctorController extends Controller
 {
-    //
-    public function index(){
-        if (!session('is_logged_in') || !session('admin_id')) {
-        return redirect()->route('login')->withErrors(['msg' => 'Please login first.']);
-    }
+    // ==========================================
+    // ADMIN ACTIONS (Managing Doctor Profiles)
+    // ==========================================
 
-        $doctors = Doctor::latest()->paginate(10);
+    public function index()
+    {
+        $doctors = Doctor::with('specialty')->latest()->paginate(10);
         return view('admin.doctors.index', compact('doctors'));
     }
 
-    public function create() {
-        if (!session('is_logged_in') || !session('admin_id')) {
-        return redirect()->route('login')->withErrors(['msg' => 'Please login first.']);
-    }
+    public function create()
+    {
         $specialties = Specialty::all();
         return view('admin.doctors.create', compact('specialties'));
     }
 
-    public function store(Request $request){
-        if (!session('is_logged_in') || !session('admin_id')) {
-        return redirect()->route('login')->withErrors(['msg' => 'Please login first.']);
-    }
-    
+    public function store(Request $request)
+    {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:doctors,email,',
+            'name'         => 'required|string|max:255',
+            'email'        => 'required|email|unique:users,email',
             'specialty_id' => 'required|exists:specialties,id',
-            'speciality' => 'nullable|string|max:500',
-            'experience' => 'required|string|max:500',
-            'address' => 'nullable|string|max:500',
-        ], [
-            'email.unique'=> 'That doctor already exist in out records.',
-            'specialty_id.required' => 'Please select a specialty.',
-            'specialty_id.exists' => 'The selected specialty is invalid.',
+            'experience'   => 'required|string|max:500',
+            'address'      => 'nullable|string|max:500',
         ]);
-        \App\Models\Doctor::create($validated);
 
-        return redirect()->route('doctors.index')
-        ->with('success', 'Doctor added successfully!');
+        // 1. Create Login Credential profile in users table
+        $user = User::create([
+            'name'     => $validated['name'],
+            'email'    => $validated['email'],
+            'password' => Hash::make('TemporaryPassword123!'), // Provide a temporary password
+            'role'     => 'doctor',
+        ]);
+
+        // 2. Create the associated Profile linking them together
+        Doctor::create([
+            'user_id'      => $user->id,
+            'name'         => $validated['name'],
+            'email'        => $validated['email'],
+            'specialty_id' => $validated['specialty_id'],
+            'speciality'   => Specialty::find($validated['specialty_id'])->name, 
+            'experience'   => $validated['experience'],
+            'address'      => $validated['address'],
+        ]);
+
+        return redirect()->route('doctors.index')->with('success', 'Doctor and User credentials created successfully!');
     }
 
-    public function edit(Doctor $doctor){
-        if (!session('is_logged_in') || !session('admin_id')) {
-        return redirect()->route('login')->withErrors(['msg' => 'Please login first.']);
-    }
+    public function edit(Doctor $doctor)
+    {
         $specialties = Specialty::all();
-        return view ('admin.doctors.edit', compact('doctor', 'specialties'));
+        return view('admin.doctors.edit', compact('doctor', 'specialties'));
     }
 
-    public function update(Request $request, Doctor $doctor){
-        if (!session('is_logged_in') || !session('admin_id')) {
-        return redirect()->route('login')->withErrors(['msg' => 'Please login first.']);
-    }
+    public function update(Request $request, Doctor $doctor)
+    {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:doctors,email,' . $doctor->id,
+            'name'         => 'required|string|max:255',
+            'email'        => 'required|email|unique:users,email,' . $doctor->user_id,
             'specialty_id' => 'required|exists:specialties,id',
-            'speciality' => 'nullable|string|max:500',
-            'experience' => 'required|string|max:500',
-            'address' => 'nullable|string|max:500',
-        ], [
-            'specialty_id.required' => 'Please select a specialty.',
-            'specialty_id.exists' => 'The selected specialty is invalid.',
+            'experience'   => 'required|string|max:500',
+            'address'      => 'nullable|string|max:500',
         ]);
-        $doctor->update($validated);
-        return redirect()->route('doctors.index')->with('success', 'Doctor updated successfully!');
+
+        // Sync updates to both the User entity and the Doctor Profile
+        $doctor->user->update([
+            'name'  => $validated['name'],
+            'email' => $validated['email']
+        ]);
+
+        $doctor->update($validated + [
+            'speciality' => Specialty::find($validated['specialty_id'])->name
+        ]);
+
+        return redirect()->route('doctors.index')->with('success', 'Doctor details synchronized.');
     }
 
-    public function destroy(Doctor $doctor){
-        if (!session('is_logged_in') || !session('admin_id')) {
-        return redirect()->route('login')->withErrors(['msg' => 'Please login first.']);
-    }
- 
-       $doctor->delete();
-       return redirect()->route('doctors.index')->with('success', 'Doctor deleted successfully');
+    public function destroy(Doctor $doctor)
+    {
+        // Cascades automatically to delete the linked doctor profile
+        User::destroy($doctor->user_id); 
+        return redirect()->route('doctors.index')->with('success', 'Doctor removed from active logs.');
     }
 
+    // ==========================================
+    // CLINICAL WORKSPACE (Doctor Access Only)
+    // ==========================================
 
+    public function myDepartmentPatients()
+    {
+        $doctorUser = Auth::user();
+
+        // Safety verification in case the doctor profile hasn't been instantiated yet
+        if (!$doctorUser->doctorProfile) {
+            abort(404, 'Structural Doctor profile missing.');
+        }
+
+        $specialtyId = $doctorUser->doctorProfile->specialty_id;
+
+        // Pull appointments matching the authenticated doctor's department specialty ID
+        $appointments = Appointment::whereHas('doctor', function($query) use ($specialtyId) {
+                $query->where('specialty_id', $specialtyId);
+            })
+            ->with('patient')
+            ->latest()
+            ->get();
+
+        return view('doctor.dashboard', compact('appointments'));
+    }
+
+    public function addDiagnosis(Request $request, $patientId)
+    {
+        $request->validate([
+            'diagnosis'    => 'required|string',
+            'medical_file' => 'nullable|file|mimes:pdf,jpg,png|max:5120', // 5MB limit
+        ]);
+
+        $filePath = null;
+        if ($request->hasFile('medical_file')) {
+            $filePath = $request->file('medical_file')->store('patient_records', 'public');
+        }
+
+        MedicalRecord::create([
+            'patient_id' => $patientId,
+            'doctor_id'  => Auth::id(), // Assigned to the logged-in user
+            'diagnosis'  => $request->diagnosis,
+            'file_path'  => $filePath,
+        ]);
+
+        return redirect()->back()->with('success', 'Medical file updated successfully.');
+    }
 }

@@ -3,47 +3,46 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Admin;
-use Illuminate\Http\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+
 class LoginController extends Controller
 {
-    public function showLoginForm(){
+    public function showLoginForm()
+    {
         return view('auth.login');
     }
 
     public function login(Request $request)
-   {
-    $credentials = $request->validate([
-        'username' => 'required',
-        'password' => 'required',
-    ]);
+    {
+        $credentials = $request->validate([
+            'email'    => 'required|email',
+            'password' => 'required',
+        ]);
 
-    
-    $admin = \App\Models\Admin::where('username', $credentials['username'])->first();
+        if (Auth::attempt($credentials, $request->filled('remember'))) {
+            $request->session()->regenerate();
 
-    //  using Hash::check)
-    if ($admin && \Hash::check($credentials['password'], $admin->password)) {
-        
-       
-        if ($admin->is_admin == 1) {
-            
-            session(['admin_id' => $admin->id]);
-            session(['is_logged_in' => true]);
-            
-            return redirect()->route('admin.dashboard');
-        } else {
-            return back()->withErrors(['username' => 'Your account is disabled (State 0).']);
+            // Redirect dynamically depending on the user's role string value
+            return match(Auth::user()->role) {
+                'admin'        => redirect()->route('admin.dashboard'),
+                'receptionist' => redirect()->route('receptionist.dashboard'), // Fixes target dashboard mapping
+                'doctor'       => redirect()->route('doctor.dashboard'),
+                default        => redirect('/'),
+            };
         }
+
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ])->onlyInput('email');
     }
 
-  
-    return back()->withErrors(['username' => 'Invalid credentials.']);
-}
-public function logout(Request $request)
-{
-    $request->session()->forget(['admin_id', 'is_logged_in']);
-    $request->session()->flush();
-    
-    return redirect()->route('login');
-}
+    public function logout(Request $request)
+    {
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login');
+    }
 }
