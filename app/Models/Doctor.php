@@ -31,9 +31,9 @@ class Doctor extends Model
         return $this->hasMany(Appointment::class);
     }
 
-    public function specialty()
+    public function specialtyProfile()
     {
-        return $this->belongsTo(Specialty::class);
+        return $this->belongsTo(Specialty::class, 'specialty_id');
     }
 
     public function user()
