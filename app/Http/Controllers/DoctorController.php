@@ -13,10 +13,7 @@ use Illuminate\Support\Facades\Auth;
 
 class DoctorController extends Controller
 {
-    // ==========================================
-    // ADMIN ACTIONS (Managing Doctor Profiles)
-    // ==========================================
-
+ 
     public function index()
     {
         $doctors = Doctor::with('specialtyProfile')->latest()->paginate(10);
@@ -33,10 +30,10 @@ class DoctorController extends Controller
     {
         $validated = $request->validate([
             'name'         => 'required|string|max:255',
+            'phone_number' => 'nullable|string|max:20',
             'email'        => 'required|email|unique:users,email',
             'specialty_id' => 'required|exists:specialties,id',
-            'experience'   => 'required|string|max:500',
-            'address'      => 'nullable|string|max:500',
+    
         ]);
 
         // 1. Create Login Credential profile in users table
@@ -48,16 +45,19 @@ class DoctorController extends Controller
         ]);
 
         // 2. Create the associated Profile linking them together
-        Doctor::create([
+        $doctor = Doctor::create([
             'user_id'      => $user->id,
             'name'         => $validated['name'],
-            'email'        => $validated['email'],
             'specialty_id' => $validated['specialty_id'],
             'speciality'   => Specialty::find($validated['specialty_id'])->name, 
-            'experience'   => $validated['experience'],
-            'address'      => $validated['address'],
+            'phone_number' => $validated['phone_number'],
         ]);
 
+        if ($request->has('schedules')){
+            foreach ($request->schedules as $schedule) {
+                $doctor->schedules()->create($schedule);
+            }
+        }
         return redirect()->route('doctors.index')->with('success', 'Doctor and User credentials created successfully!');
     }
 
@@ -71,10 +71,9 @@ class DoctorController extends Controller
     {
         $validated = $request->validate([
             'name'         => 'required|string|max:255',
-            'email'        => 'required|email|unique:users,email,' . $doctor->user_id,
             'specialty_id' => 'required|exists:specialties,id',
-            'experience'   => 'required|string|max:500',
-            'address'      => 'nullable|string|max:500',
+            'phone_number' => 'nullable|string|max:20',
+           
         ]);
 
         // Sync updates to both the User entity and the Doctor Profile
@@ -83,23 +82,29 @@ class DoctorController extends Controller
             'email' => $validated['email']
         ]);
 
-        $doctor->update($validated + [
-            'speciality' => Specialty::find($validated['specialty_id'])->name
+        $doctor->update([
+           'name'         => $validated['name'],
+           'specialty_id' => $validated['specialty_id'],
+           'speciality'   => Specialty::find($validated['specialty_id'])->name,
+           'phone_number' => $validated['phone_number'],
         ]);
+
+        $doctor->schedules()->delete();
+        if ($request->has('schedules')) {
+        foreach ($request->schedules as $schedule) {
+            $doctor->schedules()->create($schedule);
+            }
+        }
 
         return redirect()->route('doctors.index')->with('success', 'Doctor details synchronized.');
     }
 
     public function destroy(Doctor $doctor)
     {
-        // Cascades automatically to delete the linked doctor profile
+        
         User::destroy($doctor->user_id); 
         return redirect()->route('doctors.index')->with('success', 'Doctor removed from active logs.');
     }
-
-    // ==========================================
-    // CLINICAL WORKSPACE (Doctor Access Only)
-    // ==========================================
 
     public function myDepartmentPatients()
     {

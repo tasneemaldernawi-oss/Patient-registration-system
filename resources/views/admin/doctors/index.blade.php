@@ -49,10 +49,8 @@
                     <thead class="bg-slate-50 border-b border-slate-200">
                         <tr>
                             <th class="px-6 py-4 text-sm font-semibold text-slate-600">Name</th>
-                            <th class="px-6 py-4 text-sm font-semibold text-slate-600">Email</th>
+                            <th class="px-6 py-4 text-sm font-semibold text-slate-600">Phone Number</th>
                             <th class="px-6 py-4 text-sm font-semibold text-slate-600">Speciality</th>
-                            <th class="px-6 py-4 text-sm font-semibold text-slate-600">Experience</th>
-                            <th class="px-6 py-4 text-sm font-semibold text-slate-600">Address</th>
                             <th class="px-6 py-4 text-sm font-semibold text-slate-600 text-right">Actions</th>
                         </tr>
                     </thead>
@@ -62,10 +60,8 @@
                             <td class="px-6 py-4">
                                 <div class="font-medium text-slate-900">{{ $doctor->name }}</div>
                             </td>
-                            <td class="px-6 py-4 text-slate-600 text-sm"> {{$doctor->email}}</td>
+                            <td class="px-6 py-4 text-slate-600 text-sm">{{ $doctor->phone_number ?? 'N/A' }}</td>
                             <td class="px-6 py-4 text-slate-600 text-sm">{{ $doctor->specialtyProfile->name ?? ($doctor->speciality ?? 'N/A') }}</td>
-                            <td class="px-6 py-4 text-slate-600 text-sm">{{ $doctor->experience }}</td>
-                            <td class="px-6 py-4 text-slate-600 text-sm">{{ $doctor->address }}</td>
                             <td class="px-6 py-4 text-right ">
                                 <div class="flex items-center justify-end gap-3 whitespace-nowrap">
                                     <a href="{{ route('doctors.edit', $doctor->id) }}" class="text-blue-700 hover:text-blue-800">

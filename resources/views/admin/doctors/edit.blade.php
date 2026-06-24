@@ -22,6 +22,13 @@
                         class="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition">
                     @error('name') <p class="text-xs text-rose-500">{{ $message }}</p> @enderror
                 </div>
+                <div class="space-y-2">
+                    <label for="phone_number" class="block text-sm font-semibold text-slate-700">Phone Number</label>
+                    <input type="text" name="phone_number" id="phone_number" 
+                        value="{{ old('phone_number', $doctor->phone_number) }}" required
+                        class="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    @error('phone_number') <p class="text-xs text-rose-500">{{ $message }}</p> @enderror
+                </div>
 
                 <div class="space-y-2">
                     <label for="email" class="block text-sm font-semibold text-slate-700">Email Address</label>
@@ -45,28 +52,6 @@
                     @error('specialty_id') <p class="text-xs text-rose-500">{{ $message }}</p> @enderror
                 </div>
 
-                <div class="space-y-2 md:col-span-2">
-                    <label for="speciality" class="block text-sm font-semibold text-slate-700">Speciality (Legacy)</label>
-                    <textarea name="speciality" id="speciality" rows="3"
-                        class="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition">{{ old('speciality', $doctor->speciality) }}</textarea>
-                    <p class="text-xs text-slate-500">Optional legacy field. Specialty name is preferred above.</p>
-                    @error('speciality') <p class="text-xs text-rose-500">{{ $message }}</p> @enderror
-                </div>
-
-                <div class="space-y-2 md:col-span-2">
-                    <label for="experience" class="block text-sm font-semibold text-slate-700">Experience</label>
-                    <textarea name="experience" id="experience" rows="3"
-                        class="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition">{{ old('experience', $doctor->experience) }}</textarea>
-                    @error('experience') <p class="text-xs text-rose-500">{{ $message }}</p> @enderror
-                </div>
-
-
-                <div class="space-y-2 md:col-span-2">
-                    <label for="address" class="block text-sm font-semibold text-slate-700">Address</label>
-                    <textarea name="address" id="address" rows="3"
-                        class="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition">{{ old('address', $doctor->address) }}</textarea>
-                    @error('address') <p class="text-xs text-rose-500">{{ $message }}</p> @enderror
-                </div>
             </div>
 
             <div class="mt-8 pt-6 border-t border-slate-100 flex justify-end gap-3">
