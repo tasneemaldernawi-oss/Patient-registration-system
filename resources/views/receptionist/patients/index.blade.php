@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="p-4 bg-slate-50 min-h-screen" 
-     x-data="{ loading: true }" 
+     x-data="{ loading: true, search: '' }" 
      x-init="setTimeout(() => loading = false, 600)">
 
     <div class="flex justify-between items-center mb-8">
@@ -14,6 +14,7 @@
             + Add New Patient
         </a>
     </div>
+
     @if(session('success'))
         <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg flex items-center gap-3">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
@@ -22,6 +23,19 @@
             {{ session('success') }}
         </div>
     @endif
+
+    {{-- Search Bar with Icon --}}
+    <div class="mb-6 relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+        </div>
+        <input type="text" 
+               x-model="search" 
+               placeholder="Search patients by name, email, or phone..." 
+               class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none">
+    </div>
 
     <div x-show="loading" class="animate-pulse">
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -47,16 +61,17 @@
                         <tr>
                             <th class="px-6 py-4 text-sm font-semibold text-slate-600">Name</th>
                             <th class="px-6 py-4 text-sm font-semibold text-slate-600">Age</th>
-                            <th class="px-6 py-4 text-sm font-semibold text-slate-600">Gender</th>
                             <th class="px-6 py-4 text-sm font-semibold text-slate-600">Phone Number</th>
-                            <th class="px-6 py-4 text-sm font-semibold text-slate-600">Email</th>
                             <th class="px-6 py-4 text-sm font-semibold text-slate-600">Address</th>
+                            <th class="px-6 py-4 text-sm font-semibold text-slate-600">Email</th>
+                            <th class="px-6 py-4 text-sm font-semibold text-slate-600">Gender</th>
                             <th class="px-6 py-4 text-sm font-semibold text-slate-600 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         @forelse($patients as $patient)
-                        <tr class="hover:bg-slate-50 transition">
+                        <tr class="hover:bg-slate-50 transition"
+                            x-show="search === '' || '{{ strtolower($patient->name) }} {{ strtolower($patient->email) }} {{ $patient->phone }}'.includes(search.toLowerCase())">
                             <td class="px-6 py-4">
                                 <div class="font-medium text-slate-900">{{ $patient->name }}</div>
                             </td>
@@ -67,8 +82,8 @@
                                     <span class="text-slate-400 italic">No date provided</span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 text-slate-600 text-sm"> {{$patient->phone}}</td>
-                            <td class="px-6 py-4 text-slate-600 text-sm"> {{$patient->address}}</td>
+                            <td class="px-6 py-4 text-slate-600 text-sm">{{$patient->phone}}</td>
+                            <td class="px-6 py-4 text-slate-600 text-sm">{{$patient->address}}</td>
                             <td class="px-6 py-4 text-slate-600 text-sm">{{ $patient->email }}</td>
                             <td class="px-6 py-4 text-slate-600 text-sm">{{ $patient->gender }}</td>
                             <td class="px-6 py-4 text-right">
@@ -91,7 +106,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-10 text-center text-slate-500">
+                            <td colspan="7" class="px-6 py-10 text-center text-slate-500">
                                 No patients found. <a href="{{ route('patients.create') }}" class="text-blue-600 underline">Add the first patient</a>
                             </td>
                         </tr>
