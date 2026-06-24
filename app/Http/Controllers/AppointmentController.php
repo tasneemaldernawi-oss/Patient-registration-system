@@ -15,7 +15,7 @@ class AppointmentController extends Controller
         $appointments = Appointment::latest()->paginate(10);
         $specialties = Specialty::all();
         $patients = Patient::all();
-        $doctors = Doctor::all();
+        $doctors = Doctor::with('schedules')->get();
         
         return view('receptionist.appointments.index', compact('appointments', 'specialties', 'patients', 'doctors'));
     }

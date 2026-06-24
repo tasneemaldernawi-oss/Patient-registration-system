@@ -248,19 +248,24 @@
                         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-slate-700">Appointment Date</label>
-                                <input type="date" name="date" x-model="formData.date" :min="minDate" 
+                                <input type="date" name="date" x-model="formData.date" :min="minDate"
+                                       @change="validateAppointmentDate()"
                                        class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
                                        required>
+                                <p class="mt-2 text-sm text-slate-500" x-text="appointmentAvailabilityHint()"></p>
                             </div>
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-slate-700">Appointment Time</label>
-                                <input type="time" name="time" x-model="formData.time" 
+                                <input type="time" name="time" x-model="formData.time"
+                                       :min="availableTimeMin()"
+                                       :max="availableTimeMax()"
+                                       @change="validateAppointmentTime()"
                                        class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
                                        required>
                             </div>
                             <div class="space-y-2 md:col-span-2">
                                 <label class="block text-sm font-medium text-slate-700">Reason for Visit</label>
-                                <textarea name="reason" x-model="formData.reason" rows="4" 
+                                <textarea name="reason" x-model="formData.reason" rows="4"
                                           placeholder="Describe the reason for this appointment..."
                                           class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none"></textarea>
                             </div>
@@ -511,7 +516,7 @@
                     case 2:
                         return this.patientMode === 'existing' ? this.formData.patient_id !== '' : this.isNewPatientValid();
                     case 3:
-                        return this.formData.date !== '' && this.formData.time !== '';
+                        return this.formData.date !== '' && this.formData.time !== '' && this.isValidAppointmentDateTime();
                     case 4:
                         return true;
                     default:
@@ -537,6 +542,89 @@
 
             availableDoctors() {
                 return this.doctors.filter(d => d.specialty_id == this.formData.specialty_id);
+            },
+
+            selectedDoctor() {
+                return this.doctors.find(d => d.id == this.formData.doctor_id) || null;
+            },
+
+            selectedDoctorSchedules() {
+                const doctor = this.selectedDoctor();
+                return doctor && doctor.schedules ? doctor.schedules : [];
+            },
+
+            selectedDoctorScheduleDays() {
+                const days = this.selectedDoctorSchedules().map(schedule => schedule.day_of_week);
+                return [...new Set(days)];
+            },
+
+            availableSchedulesForDate(date) {
+                if (!date) return [];
+                const dayName = new Date(date).toLocaleDateString('en-US', { weekday: 'long' });
+                return this.selectedDoctorSchedules().filter(schedule => schedule.day_of_week === dayName);
+            },
+
+            formatScheduleRange(schedule) {
+                return `${schedule.start_time.slice(0,5)} - ${schedule.end_time.slice(0,5)}`;
+            },
+
+            appointmentAvailabilityHint() {
+                if (!this.formData.doctor_id) {
+                    return 'Choose a doctor first to see available days and hours.';
+                }
+                const schedules = this.selectedDoctorSchedules();
+                if (!schedules.length) {
+                    return 'Selected doctor has no availability schedule yet.';
+                }
+                if (!this.formData.date) {
+                    return 'Available days: ' + this.selectedDoctorScheduleDays().join(', ') + '. Select a date to see exact times.';
+                }
+                const ranges = this.availableSchedulesForDate(this.formData.date);
+                if (!ranges.length) {
+                    return 'Selected doctor is not available on this date.';
+                }
+                return 'Available times: ' + ranges.map(s => this.formatScheduleRange(s)).join(', ');
+            },
+
+            availableTimeMin() {
+                const ranges = this.availableSchedulesForDate(this.formData.date);
+                return ranges.length ? ranges[0].start_time.slice(0,5) : '';
+            },
+
+            availableTimeMax() {
+                const ranges = this.availableSchedulesForDate(this.formData.date);
+                return ranges.length ? ranges[ranges.length - 1].end_time.slice(0,5) : '';
+            },
+
+            isTimeInAvailableRanges() {
+                const ranges = this.availableSchedulesForDate(this.formData.date);
+                if (!ranges.length || !this.formData.time) return false;
+                return ranges.some(schedule => {
+                    const time = this.formData.time;
+                    const start = schedule.start_time.slice(0,5);
+                    const end = schedule.end_time.slice(0,5);
+                    return time >= start && time <= end;
+                });
+            },
+
+            validateAppointmentDate() {
+                if (!this.formData.date || !this.formData.doctor_id) return;
+                if (!this.availableSchedulesForDate(this.formData.date).length) {
+                    this.formData.time = '';
+                }
+            },
+
+            validateAppointmentTime() {
+                if (this.formData.date && this.formData.time && !this.isTimeInAvailableRanges()) {
+                    alert('Selected time is outside the selected doctor\'s availability.');
+                    this.formData.time = '';
+                }
+            },
+
+            isValidAppointmentDateTime() {
+                return this.selectedDoctorSchedules().length > 0 &&
+                       this.availableSchedulesForDate(this.formData.date).length > 0 &&
+                       this.isTimeInAvailableRanges();
             },
 
             selectSpecialty(id) {
@@ -679,6 +767,11 @@
         formData.append('time', this.formData.time);
         formData.append('reason', this.formData.reason);
         formData.append('status', this.formData.status);
+
+        if (!this.isValidAppointmentDateTime()) {
+            alert('Please choose a valid date and time within the selected doctor\'s availability.');
+            return;
+        }
 
         const response = await fetch('{{ route("appointments.store") }}', {
             method: 'POST',
