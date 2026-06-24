@@ -39,6 +39,7 @@ Route::middleware(['auth'])->group(function () {
     // ==========================================
     Route::middleware(['role:doctor'])->prefix('doctor')->group(function() {
         Route::get('/dashboard', [DashboardController::class, 'myDepartmentPatients'])->name('doctor.dashboard');
-        Route::post('/patients/{patient}/medical-records', [DoctorController::class, 'addDiagnosis'])->name('doctor.addRecord');
+        Route::get('/patients/{patient}/record', [DoctorController::class, 'showPatientRecord'])->name('doctor.patient.record');
+        Route::post('/patients/{patient}/medical-records', [DoctorController::class, 'addDiagnosis'])->name('doctor.add-diagnosis');
     });
 });

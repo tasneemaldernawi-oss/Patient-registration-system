@@ -127,28 +127,6 @@ class DoctorController extends Controller
     return redirect()->route('doctors.index')->with('success', 'Doctor removed from active logs.');
 }
 
-    public function myDepartmentPatients()
-    {
-        $doctorUser = Auth::user();
-
-        // Safety verification in case the doctor profile hasn't been instantiated yet
-        if (!$doctorUser->doctorProfile) {
-            abort(404, 'Structural Doctor profile missing.');
-        }
-
-        $specialtyId = $doctorUser->doctorProfile->specialty_id;
-
-        // Pull appointments matching the authenticated doctor's department specialty ID
-        $appointments = Appointment::whereHas('doctor', function($query) use ($specialtyId) {
-                $query->where('specialty_id', $specialtyId);
-            })
-            ->with('patient')
-            ->latest()
-            ->get();
-
-        return view('doctor.dashboard', compact('appointments'));
-    }
-
     public function addDiagnosis(Request $request, $patientId)
     {
         $request->validate([
@@ -168,6 +146,42 @@ class DoctorController extends Controller
             'file_path'  => $filePath,
         ]);
 
-        return redirect()->back()->with('success', 'Medical file updated successfully.');
+        return redirect()->route('doctor.dashboard', $patientId)->with('success', 'Medical file updated successfully.');
     }
+
+    public function showPatientRecord($patientId){
+        
+        $patient = \App\Models\Patient::findOrFail($patientId);
+       
+
+        return view('doctor.patient-record', compact('patient'));
+    }
+    
+    public function myDepartmentPatients(Request $request)
+{
+    $doctorUser = Auth::user();
+    
+    if (!$doctorUser->doctorProfile) {
+        abort(404, 'Doctor profile missing.');
+    }
+
+    $specialtyId = $doctorUser->doctorProfile->specialty_id;
+    $searchTerm = $request->input('search'); // Get the input from the URL
+
+    // Start the query
+    $query = Appointment::whereHas('doctor', function($q) use ($specialtyId) {
+        $q->where('specialty_id', $specialtyId);
+    })->with('patient');
+
+    // Apply the filter ONLY if a search term exists
+    if ($searchTerm) {
+        $query->whereHas('patient', function($q) use ($searchTerm) {
+            $q->where('name', 'like', '%' . $searchTerm . '%');
+        });
+    }
+
+    $appointments = $query->latest()->get();
+
+    return view('doctor.dashboard', compact('appointments'));
+}
 }
