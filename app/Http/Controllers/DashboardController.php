@@ -34,7 +34,7 @@ class DashboardController extends Controller
         $dailyLoad = Appointment::whereDate('date', Carbon::today())->count();
         $totalPatients = Patient::count();
         $pendingAppointments = Appointment::where('status', 'pending')->count();
-        $speciallistCount = User::where('role', 'doctor')->count();
+        $speciallistCount = \App\Models\Doctor::count();
 
         $appointments = Appointment::with(['patient', 'doctor'])
             ->whereDate('date', Carbon::today())
