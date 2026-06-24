@@ -22,11 +22,9 @@ class PatientController extends Controller
     {
         $validated = $request->validate([
             'name'          => 'required|string|max:255',
-            'email'         => 'required|string|email|unique:patients,email',
             'gender'        => 'required|in:Male,Female',
-            'phone'         => 'required|string|max:20',
+            'phone'         => 'required|string|max:20|unique:patients,phone',
             'date_of_birth' => 'required|date',
-            'address'       => 'nullable|string|max:500',
         ]);
         
         $patient = Patient::create($validated);
@@ -47,11 +45,9 @@ class PatientController extends Controller
     {
         $validated = $request->validate([
             'name'          => 'required|string|max:255',
-            'email'         => 'required|email|unique:patients,email,' . $patient->id,
             'gender'        => 'required|in:Male,Female',
-            'phone'         => 'required|string|max:20',
+            'phone'         => 'required|string|max:20|unique:patients,phone,' . $patient->id,
             'date_of_birth' => 'required|date',
-            'address'       => 'nullable|string|max:500',
         ]);
 
         $patient->update($validated);
