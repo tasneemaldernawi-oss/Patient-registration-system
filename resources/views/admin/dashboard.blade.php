@@ -10,11 +10,7 @@
             <h1 class="text-2xl font-bold text-slate-800">Medical System</h1>
             <p class="text-sm text-slate-500">Admin Portal</p>
         </div>
-        <div class="flex gap-4">
-            <a href="{{route('appointments.create')}}" class="bg-[#1A3263] text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-200 transition">
-                + Book Appointment
-            </a>
-        </div>
+        
     </div>
 
     <div x-show="loading" class="animate-pulse">

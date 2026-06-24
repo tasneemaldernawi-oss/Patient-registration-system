@@ -19,7 +19,7 @@ class DoctorController extends Controller
 
     public function index()
     {
-        $doctors = Doctor::with('specialty')->latest()->paginate(10);
+        $doctors = Doctor::with('specialtyProfile')->latest()->paginate(10);
         return view('admin.doctors.index', compact('doctors'));
     }
 
