@@ -23,13 +23,6 @@
                     @error('name') <p class="text-xs text-rose-500">{{ $message }}</p> @enderror
                 </div>
 
-                <div class="space-y-2">
-                    <label for="email" class="block text-sm font-semibold text-slate-700">Email Address</label>
-                    <input type="email" name="email" id="email" 
-                        value="{{ old('email', $patient->email) }}" required
-                        class="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition">
-                    @error('email') <p class="text-xs text-rose-500">{{ $message }}</p> @enderror
-                </div>
 
                 <div class="space-y-2">
                     <label for="phone" class="block text-sm font-semibold text-slate-700">Phone Number</label>
@@ -48,20 +41,13 @@
                 </div>
 
                 <div class="space-y-2">
-                    <label for="gender" class="block text-sm font-semibold text-slate-700">Sex</label>
+                    <label for="gender" class="block text-sm font-semibold text-slate-700">Gender</label>
                     <select name="gender" id="gender" required class="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition">
                         <option value="">Select gender</option>
                         <option value="Male" {{ old('gender', $patient->gender) === 'Male' ? 'selected' : '' }}>Male</option>
                         <option value="Female" {{ old('gender', $patient->gender) === 'Female' ? 'selected' : '' }}>Female</option>
                     </select>
                     @error('gender') <p class="text-xs text-rose-500">{{ $message }}</p> @enderror
-                </div>
-
-                <div class="space-y-2 md:col-span-2">
-                    <label for="address" class="block text-sm font-semibold text-slate-700">Address</label>
-                    <textarea name="address" id="address" rows="3"
-                        class="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition">{{ old('address', $patient->address) }}</textarea>
-                    @error('address') <p class="text-xs text-rose-500">{{ $message }}</p> @enderror
                 </div>
             </div>
 
