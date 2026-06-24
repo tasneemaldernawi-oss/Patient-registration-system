@@ -24,6 +24,10 @@ class Doctor extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+    public function schedules()
+    {
+        return $this->hasMany(DoctorSchedule::class, 'doctor_id');
+    }
 
     public function appointments()
     {

@@ -51,6 +51,7 @@ class DoctorController extends Controller
             'specialty_id' => $validated['specialty_id'],
             'speciality'   => Specialty::find($validated['specialty_id'])->name, 
             'phone_number' => $validated['phone_number'],
+            'email' => $validated['email']
         ]);
 
         if ($request->has('schedules')){
@@ -64,26 +65,40 @@ class DoctorController extends Controller
     public function edit(Doctor $doctor)
     {
         $specialties = Specialty::all();
-        return view('admin.doctors.edit', compact('doctor', 'specialties'));
+        $doctor->load('schedules'); 
+        $schedules = \App\Models\DoctorSchedule::where('doctor_id', $doctor->id)->get();
+        return view('admin.doctors.edit', compact('doctor', 'specialties', 'schedules'));
     }
 
     public function update(Request $request, Doctor $doctor)
     {
-        $validated = $request->validate([
-            'name'         => 'required|string|max:255',
-            'specialty_id' => 'required|exists:specialties,id',
-            'phone_number' => 'nullable|string|max:20',
-           
-        ]);
+        $rules = [
+        'name'         => 'required|string|max:255',
+        'specialty_id' => 'required|exists:specialties,id',
+        'phone_number' => 'nullable|string|max:20',
+    ];
+   
+    if ($doctor->user) {
+        
+        $rules['email'] = 'required|email|unique:users,email,' . $doctor->user->id;
+    } else {
+       
+        $rules['email'] = 'nullable|email'; 
+    }
 
-        // Sync updates to both the User entity and the Doctor Profile
-        $doctor->user->update([
-            'name'  => $validated['name'],
-            'email' => $validated['email']
-        ]);
+    // 3. Execute validation
+    $validated = $request->validate($rules);
+
+        if ($doctor->user){
+            $doctor->user->update([
+                'name'  => $validated['name'],
+                'email' => $validated['email']
+            ]);
+        }
 
         $doctor->update([
            'name'         => $validated['name'],
+           'email'        => $validated['email'],
            'specialty_id' => $validated['specialty_id'],
            'speciality'   => Specialty::find($validated['specialty_id'])->name,
            'phone_number' => $validated['phone_number'],
@@ -91,8 +106,10 @@ class DoctorController extends Controller
 
         $doctor->schedules()->delete();
         if ($request->has('schedules')) {
-        foreach ($request->schedules as $schedule) {
-            $doctor->schedules()->create($schedule);
+          foreach ($request->schedules as $schedule) {
+            if(!empty($schedule['day_of_week']) && !empty($schedule['start_time']) && !empty($schedule['end_time'])) {
+                $doctor->schedules()->create($schedule);
+            }
             }
         }
 
@@ -100,11 +117,15 @@ class DoctorController extends Controller
     }
 
     public function destroy(Doctor $doctor)
-    {
-        
-        User::destroy($doctor->user_id); 
-        return redirect()->route('doctors.index')->with('success', 'Doctor removed from active logs.');
+{
+    if ($doctor->user_id) {
+        User::destroy($doctor->user_id);
     }
+    
+    $doctor->delete();
+    
+    return redirect()->route('doctors.index')->with('success', 'Doctor removed from active logs.');
+}
 
     public function myDepartmentPatients()
     {

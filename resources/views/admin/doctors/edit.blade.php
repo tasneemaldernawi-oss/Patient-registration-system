@@ -51,6 +51,52 @@
                     </select>
                     @error('specialty_id') <p class="text-xs text-rose-500">{{ $message }}</p> @enderror
                 </div>
+                <div class="mt-8">
+             
+    <h3 class="text-lg font-bold text-slate-800 mb-4">Availability Schedule</h3>
+    
+    <div id="schedule-container" class="space-y-4">
+        @forelse($doctor->schedules as $index => $schedule)
+            <div class="flex gap-4 items-center p-4 bg-slate-50 rounded-lg border border-slate-100">
+                <select name="schedules[{{ $index }}][day_of_week]" class="rounded-lg border-slate-200">
+                    @foreach(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as $day)
+                        <option value="{{ $day }}" {{ $schedule->day_of_week == $day ? 'selected' : '' }}>
+                            {{ $day }}
+                        </option>
+                    @endforeach
+                </select>
+                
+                <input type="time" name="schedules[{{ $index }}][start_time]" 
+                       value="{{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }}" 
+                       class="rounded-lg border-slate-200">
+                
+                <input type="time" name="schedules[{{ $index }}][end_time]" 
+                       value="{{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}" 
+                       class="rounded-lg border-slate-200">
+            </div>
+        @empty
+            <div class="flex gap-4 items-center p-4 bg-slate-50 rounded-lg border border-slate-100">
+                <select name="schedules[0][day_of_week]" class="rounded-lg border-slate-200">
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
+                </select>
+                <input type="time" name="schedules[0][start_time]" class="rounded-lg border-slate-200">
+                <input type="time" name="schedules[0][end_time]" class="rounded-lg border-slate-200">
+            </div>
+        @endforelse
+    </div>
+
+    <button type="button" id="add-schedule-btn" class="mt-4 text-sm text-blue-600 font-semibold hover:underline">
+        + Add another day/shift
+    </button>
+</div>
+    
+</div>
 
             </div>
 
