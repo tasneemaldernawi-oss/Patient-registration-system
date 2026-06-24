@@ -117,7 +117,7 @@
                             <template x-for="doctor in availableDoctors()" :key="doctor.id">
                                 <label class="flex items-center p-4 border-2 rounded-lg cursor-pointer transition hover:bg-slate-50"
                                        :class="formData.doctor_id == doctor.id ? 'border-blue-500 bg-blue-50' : 'border-slate-200'">
-                                    <input type="radio" name="doctor_id" :value="doctor.id" x-model="formData.doctor_id" class="w-4 h-4">
+                                    <input type="radio" name="doctor_id" :value="doctor.id" x-model="formData.doctor_id" @change="resetDateTime()" class="w-4 h-4">
                                     <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm ml-2 flex-shrink-0"
                                          x-text="doctor.name.charAt(0).toUpperCase()"></div>
                                     <div class="ml-4">
@@ -248,20 +248,28 @@
                         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-slate-700">Appointment Date</label>
-                                <input type="date" name="date" x-model="formData.date" :min="minDate"
-                                       @change="validateAppointmentDate()"
-                                       class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                                       required>
+                                <select name="date" x-model="formData.date" @change="validateAppointmentDate()"
+                                        :disabled="!formData.doctor_id"
+                                        class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                                        required>
+                                    <option value="" disabled selected>Select available date</option>
+                                    <template x-for="dateOption in availableDateOptions()" :key="dateOption.value">
+                                        <option :value="dateOption.value" x-text="dateOption.label"></option>
+                                    </template>
+                                </select>
                                 <p class="mt-2 text-sm text-slate-500" x-text="appointmentAvailabilityHint()"></p>
                             </div>
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-slate-700">Appointment Time</label>
-                                <input type="time" name="time" x-model="formData.time"
-                                       :min="availableTimeMin()"
-                                       :max="availableTimeMax()"
-                                       @change="validateAppointmentTime()"
-                                       class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                                       required>
+                                <select name="time" x-model="formData.time" @change="validateAppointmentTime()"
+                                        :disabled="!formData.date"
+                                        class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                                        required>
+                                    <option value="" disabled selected>Select available time</option>
+                                    <template x-for="timeOption in availableTimesForDate(formData.date)" :key="timeOption">
+                                        <option :value="timeOption" x-text="timeOption"></option>
+                                    </template>
+                                </select>
                             </div>
                             <div class="space-y-2 md:col-span-2">
                                 <label class="block text-sm font-medium text-slate-700">Reason for Visit</label>
@@ -558,6 +566,48 @@
                 return [...new Set(days)];
             },
 
+            availableDateOptions() {
+                const days = this.selectedDoctorScheduleDays();
+                if (!days.length) return [];
+
+                const options = [];
+                const maxDays = 60;
+                const startDate = new Date(this.minDate);
+                for (let i = 0; i < maxDays; i++) {
+                    const checkDate = new Date(startDate);
+                    checkDate.setDate(checkDate.getDate() + i);
+                    const weekday = checkDate.toLocaleDateString('en-US', { weekday: 'long' });
+                    if (days.includes(weekday)) {
+                        const isoDate = checkDate.toISOString().split('T')[0];
+                        const label = checkDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                        options.push({ value: isoDate, label: label });
+                    }
+                }
+                return options;
+            },
+
+            availableTimesForDate(date) {
+                if (!date) return [];
+                const schedules = this.availableSchedulesForDate(date);
+                const options = [];
+                schedules.forEach(schedule => {
+                    let current = schedule.start_time.slice(0,5);
+                    const end = schedule.end_time.slice(0,5);
+                    while (current <= end) {
+                        options.push(current);
+                        const [hours, minutes] = current.split(':').map(Number);
+                        const next = new Date(0,0,0,hours,minutes + 15);
+                        current = next.toTimeString().slice(0,5);
+                    }
+                });
+                return options;
+            },
+
+            resetDateTime() {
+                this.formData.date = '';
+                this.formData.time = '';
+            },
+
             availableSchedulesForDate(date) {
                 if (!date) return [];
                 const dayName = new Date(date).toLocaleDateString('en-US', { weekday: 'long' });
@@ -610,6 +660,8 @@
             validateAppointmentDate() {
                 if (!this.formData.date || !this.formData.doctor_id) return;
                 if (!this.availableSchedulesForDate(this.formData.date).length) {
+                    alert('The selected doctor is not available on this date.');
+                    this.formData.date = '';
                     this.formData.time = '';
                 }
             },
