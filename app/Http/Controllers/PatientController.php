@@ -51,12 +51,12 @@ class PatientController extends Controller
         ]);
 
         $patient->update($validated);
-        return redirect()->route('patients.index')->with('success', 'Patient metrics updated successfully.');
+        return redirect()->route('patients.index')->with('success', 'Patient  updated successfully.');
     }
 
     public function destroy(Patient $patient)
     {
         $patient->delete();
-        return redirect()->route('patients.index')->with('success', 'Patient record discarded.');
+        return redirect()->route('patients.index')->with('success', 'Patient record is deleted.');
     }
 }
