@@ -166,14 +166,14 @@ class DoctorController extends Controller
     }
 
     $specialtyId = $doctorUser->doctorProfile->specialty_id;
-    $searchTerm = $request->input('search'); // Get the input from the URL
+    $searchTerm = $request->input('search'); 
 
-    // Start the query
+  
     $query = Appointment::whereHas('doctor', function($q) use ($specialtyId) {
         $q->where('specialty_id', $specialtyId);
     })->with('patient');
 
-    // Apply the filter ONLY if a search term exists
+   
     if ($searchTerm) {
         $query->whereHas('patient', function($q) use ($searchTerm) {
             $q->where('name', 'like', '%' . $searchTerm . '%');
